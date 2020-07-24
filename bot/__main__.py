@@ -48,7 +48,7 @@ async def on_command_error(ctx, exc):
         # if isinstance(exc.original, HTTPException):
         #   await ctx.send("Unable to send message.")
 
-        if isinstance(exc.original, commands.Forbidden):
+        if isinstance(exc.original, discord.errors.Forbidden):
             await ctx.send("I do not have permission to do that.")
 
         else:
