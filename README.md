@@ -1,3 +1,6 @@
+[![shield.io](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-364/)
+[![shield.io](https://img.shields.io/badge/support-discord-lightgrey.svg)](https://discord.gg/hhVjAN8)
+
 # Shiny Bot
 
 A Python bot based off of the [`discord.py 1.3.4` project](https://discordpy.readthedocs.io/en/v1.3.4/) (this is the current stable release of the project as of time of writing this)
@@ -24,6 +27,7 @@ We're licensed under MIT
 * [Lucas's Python.py YouTube Tutorial series](https://www.youtube.com/playlist?list=PLW3GfRiBCHOhfVoiDZpSz8SM_HybXRPzZ) for the help with starting and setting this up.
 * [Carberra Tutorials](https://www.youtube.com/playlist?list=PLYeOw6sTSy6ZGyygcbta7GcpI8a5-Cooc) for his tutorials as well
 
-## Donating 💸
+## Donating
 Someone mentioned that I should put this here in case people feel like donating a little bit to me and my projects
-<a href="https://www.buymeacoffee.com/thomashine" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-blue.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
+
+[![shield.io](https://img.shields.io/badge/buymeacoffee-thomashine-blue)](https://www.buymeacoffee.com/thomashine)
