@@ -14,9 +14,12 @@ A Python bot based off of the [`discord.py 1.3.4` project](https://discordpy.rea
 1. Run `pip3 install -r requirements.txt` to install all of the required dependancies.
 1. Run the main script: `python3 ./bot`.
 
+If you want to overwrite any of the default values (like `MYSQL_PORT`) in `.env` then copy the line and paste it in to your `.env.local` file.
+
 We're licensed under MIT
 
 ## Credits
 * [BloodyThorn](https://github.com/bloodythorn) and his [WiiHacky](https://github.com/bloodythorn/wiihacky/) project and inspiration to work on this.
 * [discord.py](https://github.com/Rapptz/discord.py) for the basis of this project.
 * [Lucas's Python.py YouTube Tutorial series](https://www.youtube.com/playlist?list=PLW3GfRiBCHOhfVoiDZpSz8SM_HybXRPzZ) for the help with starting and setting this up.
+* [Carberra Tutorials](https://www.youtube.com/playlist?list=PLYeOw6sTSy6ZGyygcbta7GcpI8a5-Cooc) for his tutorials as well
