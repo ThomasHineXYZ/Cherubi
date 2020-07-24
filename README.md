@@ -23,3 +23,7 @@ We're licensed under MIT
 * [discord.py](https://github.com/Rapptz/discord.py) for the basis of this project.
 * [Lucas's Python.py YouTube Tutorial series](https://www.youtube.com/playlist?list=PLW3GfRiBCHOhfVoiDZpSz8SM_HybXRPzZ) for the help with starting and setting this up.
 * [Carberra Tutorials](https://www.youtube.com/playlist?list=PLYeOw6sTSy6ZGyygcbta7GcpI8a5-Cooc) for his tutorials as well
+
+## Donating 💸
+Someone mentioned that I should put this here in case people feel like donating a little bit to me and my projects
+<a href="https://www.buymeacoffee.com/thomashine" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-blue.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
