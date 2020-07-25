@@ -29,7 +29,7 @@ def get_prefix(client, message):
                 guild,
                 command_prefix
 
-            FROM preferences
+            FROM preferences;
         """
         prefix_list = db.query(query)
         for guild, prefix in prefix_list:
@@ -47,7 +47,7 @@ client = commands.Bot(command_prefix = get_prefix)
 @client.event
 async def on_ready():
     status = client.get_cog('Status')
-    if os.environ['DEBUG'].lower() == 'true':
+    if os.environ['DEBUG'].lower() == "true":
         await status.set_status("idle")
         await status.set_activity("playing around in debug mode.")
 
@@ -93,7 +93,7 @@ async def on_guild_join(guild):
     db = mysql()
     query = """
         INSERT INTO preferences (guild, command_prefix)
-        VALUES (%s, %s)
+        VALUES (%s, %s);
     """
     db.execute(query, [guild.id, os.environ['COMMAND_PREFIX']])
     db.close()
@@ -106,39 +106,39 @@ async def on_guild_remove(guild):
     db = mysql()
     query = """
         DELETE FROM preferences
-        WHERE guild = %s
+        WHERE guild = %s;
     """
     db.execute(query, [guild.id])
     db.close()
 
 @client.command()
 async def ping(ctx):
-    await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
+    await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
 
 # Debug commands meant for when working on the bot
-if os.environ['DEBUG'].lower() == 'true':
+if os.environ['DEBUG'].lower() == "true":
     @client.command()
     async def load(ctx, extension):
-        print(f'Loading {extension}')
-        await ctx.send(f'Loading {extension}')
-        client.load_extension(f'cogs.{extension}')
+        print(f"Loading {extension}")
+        await ctx.send(f"Loading {extension}")
+        client.load_extension(f"cogs.{extension}")
 
     @client.command()
     async def unload(ctx, extension):
-        print(f'Unloading {extension}')
-        await ctx.send(f'Unloading {extension}')
-        client.unload_extension(f'cogs.{extension}')
+        print(f"Unloading {extension}")
+        await ctx.send(f"Unloading {extension}")
+        client.unload_extension(f"cogs.{extension}")
 
     @client.command()
     async def reload(ctx, extension):
-        print(f'Reloading {extension}')
-        await ctx.send(f'Reloading {extension}')
-        client.unload_extension(f'cogs.{extension}')
-        client.load_extension(f'cogs.{extension}')
+        print(f"Reloading {extension}")
+        await ctx.send(f"Reloading {extension}")
+        client.unload_extension(f"cogs.{extension}")
+        client.load_extension(f"cogs.{extension}")
 
 # Load up the cogs
-for filename in os.listdir('./bot/cogs'):
-    if filename.endswith('.py'):
-        client.load_extension(f'cogs.{filename[:-3]}');
+for filename in os.listdir("./bot/cogs"):
+    if filename.endswith(".py"):
+        client.load_extension(f"cogs.{filename[:-3]}");
 
 client.run(os.environ['DISCORD_BOT_TOKEN'])
