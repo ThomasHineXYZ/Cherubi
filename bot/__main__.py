@@ -1,5 +1,6 @@
 from discord.ext import commands
 from dotenv import load_dotenv
+from lib.mysql import mysql
 from pathlib import Path
 import discord
 import os
@@ -20,12 +21,16 @@ if os.path.isfile(local_env_file_name):
 # Set the prefixes for each of the guilds
 prefixes = {}
 def get_prefix(client, message):
-    from lib.mysql import mysql
-
     # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
         db = mysql()
-        query = """SELECT guild, command_prefix FROM preferences"""
+        query = """
+            SELECT
+                guild,
+                command_prefix
+
+            FROM preferences
+        """
         prefix_list = db.query(query)
         for guild, prefix in prefix_list:
             prefixes[guild] = prefix
@@ -75,6 +80,32 @@ async def on_command_error(ctx, exc):
 
     else:
         raise exc
+
+@client.event
+async def on_guild_join(guild):
+    print(f"Joined guild: {guild.id} / {guild.name}")
+
+    # Set the default preferences for a guild upon joining
+    db = mysql()
+    query = """
+        INSERT INTO preferences (guild, command_prefix)
+        VALUES (%s, %s)
+    """
+    db.execute(query, [guild.id, os.environ['COMMAND_PREFIX']])
+    db.close()
+
+@client.event
+async def on_guild_remove(guild):
+    print(f"Left guild: {guild.id} / {guild.name}")
+
+    # Removes the preferences line for a guild
+    db = mysql()
+    query = """
+        DELETE FROM preferences
+        WHERE guild = %s
+    """
+    db.execute(query, [guild.id])
+    db.close()
 
 @client.command()
 async def ping(ctx):
