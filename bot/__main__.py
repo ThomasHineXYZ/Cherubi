@@ -44,6 +44,9 @@ async def on_command_error(ctx, exc):
     elif isinstance(exc, commands.CommandOnCooldown):
         await ctx.send(f"That command is on {str(exc.cooldown.type).split('.')[-1]} cooldown. Try again in {exc.retry_after:,.2f} secs.")
 
+    elif isinstance(exc, commands.errors.CheckFailure):
+        await ctx.send("You don't have permission to use that command")
+
     elif hasattr(exc, "original"):
         # if isinstance(exc.original, HTTPException):
         #   await ctx.send("Unable to send message.")
