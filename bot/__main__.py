@@ -17,7 +17,23 @@ if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
 # Start up the bot
-client = commands.Bot(command_prefix = os.environ['COMMAND_PREFIX'])
+# Set the prefixes for each of the guilds
+prefixes = {}
+def get_prefix(client, message):
+    from lib.mysql import mysql
+
+    # If their prefix isn't in the list for some reason, re-run
+    if message.guild.id not in prefixes:
+        db = mysql()
+        query = """SELECT guild, command_prefix FROM preferences"""
+        prefix_list = db.query(query)
+        for guild, prefix in prefix_list:
+            prefixes[guild] = prefix
+
+    # Return their prefix from the prefixes dictionary
+    return prefixes[message.guild.id]
+
+client = commands.Bot(command_prefix = get_prefix)
 
 @client.event
 async def on_ready():
@@ -85,6 +101,7 @@ if os.environ['DEBUG'].lower() == 'true':
         client.unload_extension(f'cogs.{extension}')
         client.load_extension(f'cogs.{extension}')
 
+# Load up the cogs
 for filename in os.listdir('./bot/cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}');

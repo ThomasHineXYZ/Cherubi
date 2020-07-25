@@ -30,7 +30,7 @@ class Preferences(commands.Cog):
         await ctx.send(test[0][0])
 
     @commands.command(pass_context = True)
-    @commands.check(user_is_me)
+    @commands.check(user_is_author)
     async def preference3(self, ctx):
         db = mysql()
         query = """SELECT name FROM test"""
