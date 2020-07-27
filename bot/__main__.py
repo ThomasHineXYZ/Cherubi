@@ -119,6 +119,7 @@ async def on_guild_remove(guild):
     db.close()
 
 @client.command()
+@commands.cooldown(1, 10, commands.BucketType.guild)
 async def ping(ctx):
     await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
 
