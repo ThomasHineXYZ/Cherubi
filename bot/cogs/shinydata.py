@@ -66,7 +66,7 @@ class ShinyData(commands.Cog):
                 row.get('shiny_released', False),
                 row.get('released_date', None),
                 row.get('fn', None),
-                row.get('isotope', None),
+                row.get('isotope', ''),
                 row['family']
             ])
         db.close()

@@ -65,6 +65,7 @@ class ShinyEmbed(commands.Cog):
         db.execute(query, [input, input, input, input, input, input, input])
         results = db.fetchall()
         db.close()
+
         return results
 
     def generate_image_link(self, result, shiny = True):
@@ -87,9 +88,9 @@ class ShinyEmbed(commands.Cog):
                 url = base_url + f"pokemon_icon_{result[5]}_shiny.png"
                 pass
             else:
-                # base_url + pokemon_icon_{dex}{type}{isotope or ''}
+                # base_url + pokemon_icon_{fn}.png
                 url = base_url + f"pokemon_icon_{result[5]}.png"
-        print(url)
+
         return cache_link + url
 
     def generate_embed(self, ctx, image, result):
@@ -97,7 +98,7 @@ class ShinyEmbed(commands.Cog):
         # Cherubi pink: 0xE66479
         embed = discord.Embed(
             title = f"Shiny {result[1]}",
-            description = "this is a description",
+            description = f"National Dex #{result[0]}",
             colour = 0x2FA439,
             timestamp=datetime.utcnow()
         )
