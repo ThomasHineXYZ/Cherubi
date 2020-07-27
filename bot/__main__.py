@@ -32,6 +32,7 @@ def set_default_preferences(guild_id):
 prefixes = {}
 def get_prefix(client, message):
     # If their prefix isn't in the list for some reason, re-run
+    global prefixes
     if message.guild.id not in prefixes:
         set_default_preferences(message.guild.id)
         db = mysql()
@@ -138,6 +139,10 @@ async def changeprefix(ctx, prefix):
     """
     db.execute(query, [prefix, ctx.guild.id])
     db.close()
+
+    # Set the local prefix dictionary to blank
+    global prefixes
+    prefixes = {}
 
     # Then finally send the user a message saying that it is changed
     await ctx.send(f"Prefix has been changed to: {prefix}")
