@@ -17,12 +17,23 @@ local_env_path = Path('.') / local_env_file_name
 if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
-# Start up the bot
+# Sets the guild preferences for the guilds
+def set_default_preferences(guild_id):
+    db = mysql()
+    query = """
+        INSERT INTO preferences (guild, command_prefix)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE guild = guild;
+    """
+    db.execute(query, [guild_id, os.environ['COMMAND_PREFIX']])
+    db.close()
+
 # Set the prefixes for each of the guilds
 prefixes = {}
 def get_prefix(client, message):
     # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
+        set_default_preferences(message.guild.id)
         db = mysql()
         query = """
             SELECT
@@ -42,6 +53,7 @@ def get_prefix(client, message):
     # Return their prefix from the prefixes dictionary
     return prefixes[message.guild.id]
 
+# Start up the bot
 client = commands.Bot(command_prefix = get_prefix)
 
 @client.event
@@ -90,13 +102,7 @@ async def on_guild_join(guild):
     print(f"Joined guild: {guild.id} / {guild.name}")
 
     # Set the default preferences for a guild upon joining
-    db = mysql()
-    query = """
-        INSERT INTO preferences (guild, command_prefix)
-        VALUES (%s, %s);
-    """
-    db.execute(query, [guild.id, os.environ['COMMAND_PREFIX']])
-    db.close()
+    set_default_preferences(guild.id)
 
 @client.event
 async def on_guild_remove(guild):
@@ -114,6 +120,27 @@ async def on_guild_remove(guild):
 @client.command()
 async def ping(ctx):
     await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
+
+@client.command()
+@commands.is_owner()
+async def changeprefix(ctx, prefix):
+    # If someone tries to set more than a single character
+    if len(prefix) > 1:
+        ctx.send("Command prefix can only be a single character")
+        return
+
+    # Store the character in the preferences table
+    db = mysql()
+    query = """
+        UPDATE preferences
+        SET command_prefix = %s
+        WHERE guild = %s;
+    """
+    db.execute(query, [prefix, ctx.guild.id])
+    db.close()
+
+    # Then finally send the user a message saying that it is changed
+    await ctx.send(f"Prefix has been changed to: {prefix}")
 
 # Debug commands meant for when working on the bot
 if os.environ['DEBUG'].lower() == "true":
