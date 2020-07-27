@@ -23,7 +23,7 @@ class ShinyData(commands.Cog):
                 name_en,
                 name_fr,
                 name_ja,
-                name_jr,
+                name_kr,
                 name_zh,
                 type,
                 shiny_released,
@@ -47,7 +47,7 @@ class ShinyData(commands.Cog):
                 %s
             ) ON DUPLICATE KEY UPDATE
                 shiny_released = VALUES(shiny_released),
-                released_date = VALUES(released_date),
+                released_date = COALESCE(VALUES(released_date), released_date),
                 fn = VALUES(fn),
                 isotope = VALUES(isotope),
                 family = VALUES(family)
@@ -62,8 +62,8 @@ class ShinyData(commands.Cog):
                 row['name']['ja'],
                 row['name']['kr'],
                 row['name']['zh'],
-                row.get('type', None),
-                row.get('shiny_released', None),
+                row.get('type', '_00'),
+                row.get('shiny_released', False),
                 row.get('released_date', None),
                 row.get('fn', None),
                 row.get('isotope', None),
