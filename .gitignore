@@ -1,8 +1,12 @@
 # Testing
 run/
 onholdcode/
+test/
 bot/cogs/test.py
 test.py
+
+# Backup files
+backup/
 
 # Sublime Project Files
 *sublime-workspace
