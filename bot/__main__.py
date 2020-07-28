@@ -44,6 +44,7 @@ def get_prefix(client, message):
             FROM preferences;
         """
         prefix_list = db.query(query)
+        db.close()
         for guild, prefix in prefix_list:
             prefixes[guild] = prefix
 
