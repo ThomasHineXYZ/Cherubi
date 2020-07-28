@@ -1,5 +1,5 @@
 from discord.ext import commands
-from github import Github
+import github
 from lib.mysql import mysql
 import discord
 import os
@@ -7,16 +7,24 @@ import os
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.github = Github(os.environ['GITHUB_ACCESS_TOKEN'])
+        self.github = github.Github(os.environ['GITHUB_ACCESS_TOKEN'])
 
     @commands.command()
     async def run(self, ctx):
         repo = self.github.get_repo("PokeMiners/pogo_assets")
+        # test = repo.create_git_tree([
+        #     github.InputGitTreeElement(
+        #         "Images/Pokemon",
+        #         "100644",
+        #         "blob",
+        #         #content="File created by PyGithub"
+        #     )
+        # ])
+
+        # print(test)
+
         branch = repo.get_branch("master")
-        contents = repo.get_git_tree("Images/Pokemon/")
-        for file in contents:
-            print(file.path)
-        await ctx.send(branch.commit)
+        await ctx.send(branch)
 
 def setup(client):
     client.add_cog(PoGoAssets(client))
