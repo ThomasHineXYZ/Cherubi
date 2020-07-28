@@ -49,7 +49,7 @@ class PoGoAssets(commands.Cog):
         commit_hash = self.get_newest_commit_hash(repo)
         new_commit = self.check_commit_hash(commit_hash)
 
-        if new_commit == True:
+        if new_commit:
             # In case I need to get a different tree_id later:
             # https://stackoverflow.com/questions/25022016/get-all-file-names-from-a-github-repo-through-the-github-api/61656698#61656698
             # https://api.github.com/repos/PokeMiners/pogo_assets/git/trees/master?recursive=1
