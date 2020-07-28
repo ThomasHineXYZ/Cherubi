@@ -12,19 +12,11 @@ class PoGoAssets(commands.Cog):
     @commands.command()
     async def run(self, ctx):
         repo = self.github.get_repo("PokeMiners/pogo_assets")
-        # test = repo.create_git_tree([
-        #     github.InputGitTreeElement(
-        #         "Images/Pokemon",
-        #         "100644",
-        #         "blob",
-        #         #content="File created by PyGithub"
-        #     )
-        # ])
-
-        # print(test)
-
         branch = repo.get_branch("master")
-        await ctx.send(branch)
+        contents = repo.get_contents("Images/Pokemon/")
+        for file in contents:
+            print(file.path)
+        await ctx.send(branch.commit)
 
 def setup(client):
     client.add_cog(PoGoAssets(client))
