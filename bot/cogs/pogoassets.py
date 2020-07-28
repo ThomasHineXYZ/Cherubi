@@ -56,7 +56,7 @@ class PoGoAssets(commands.Cog):
         text = filename[13:]
 
         # If it now starts with 'pm', it's a special Pokemon
-        if filename[:2] == "pm":
+        if text[0:2] == "pm":
             print(f"Special Pokemon: {text}")
 
         print(text)
