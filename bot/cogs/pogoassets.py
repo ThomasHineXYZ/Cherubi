@@ -15,6 +15,7 @@ class PoGoAssets(commands.Cog):
         return branch.commit.sha
 
     def check_commit_hash(self, hash):
+        # Grab the current commit hash that we have stored
         db = mysql()
         query = """
             SELECT value
@@ -24,13 +25,18 @@ class PoGoAssets(commands.Cog):
         results = db.query(query, ['pogo_assets_commit_hash'])
         db.close()
 
+        # If the value doesn't doesn't exist in the checks table, add it and say
+        # that its a new commit
         if len(results) == 0:
             self.store_commit_hash(hash)
             return True
 
+        # If the grabbed commit hash equals the one that we have stored, it's
+        # not a new commit
         if results[0][0] == hash:
             return False
 
+        # Otherwise just assume it's a new commit, it shouldn't hurt anything
         return True
 
     def store_commit_hash(self, hash):
@@ -113,8 +119,8 @@ class PoGoAssets(commands.Cog):
 
         return data
 
-    @commands.command()
-    async def run(self, ctx):
+    @tasks.loop(hours = 12)
+    async def load_data_from_github(self):
         repo = self.github.get_repo("PokeMiners/pogo_assets")
         commit_hash = self.get_newest_commit_hash(repo)
         new_commit = self.check_commit_hash(commit_hash)
@@ -130,10 +136,10 @@ class PoGoAssets(commands.Cog):
                 data = self.translate_filename(file.path)
 
             self.store_commit_hash(commit_hash)
-            await ctx.send("New commit!")
+            print("New PoGo Assets commit!")
 
         else:
-            await ctx.send("No new commit")
+            print("No new PoGo Assets commit.")
 
 
 def setup(client):
