@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 import github
 from lib.mysql import mysql
 import discord
@@ -8,6 +8,7 @@ import re
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.load_data_from_github.start()
         self.github = github.Github(os.environ['GITHUB_ACCESS_TOKEN'])
 
     def get_newest_commit_hash(self, repo):
@@ -49,7 +50,7 @@ class PoGoAssets(commands.Cog):
         results = db.execute(query, ['pogo_assets_commit_hash', hash])
         db.close()
 
-    def store_pokemon(self, files):
+    def store_pokemon_images(self, files):
         # Open a connection to the database and set the query up
         db = mysql()
         query = """
@@ -68,7 +69,7 @@ class PoGoAssets(commands.Cog):
                     data['type'],
                     data['isotope'],
                     data['filename'],
-                    data['Shiny'],
+                    data['shiny'],
                 ],
             )
 
@@ -115,7 +116,7 @@ class PoGoAssets(commands.Cog):
             data["isotope"] = ""
 
         data["filename"] = specialFilename
-        data["Shiny"] = shiny
+        data["shiny"] = shiny
 
         return data
 
@@ -125,22 +126,23 @@ class PoGoAssets(commands.Cog):
         commit_hash = self.get_newest_commit_hash(repo)
         new_commit = self.check_commit_hash(commit_hash)
 
-        if not new_commit: # NOTE This is hard set to false for testing
+        if new_commit: # NOTE This is hard set to false for testing
             # In case I need to get a different tree_id later:
             # https://stackoverflow.com/questions/25022016/get-all-file-names-from-a-github-repo-through-the-github-api/61656698#61656698
             # https://api.github.com/repos/PokeMiners/pogo_assets/git/trees/master?recursive=1
             files = repo.get_git_tree("ace98ff9284529e67c1fa3d1548d953596254b6e").tree
 
-            self.store_pokemon(files)
-            for file in files:
-                data = self.translate_filename(file.path)
-
+            self.store_pokemon_images(files)
             self.store_commit_hash(commit_hash)
-            print("New PoGo Assets commit!")
+            print("New PokeMiners/pogo_assets commit!")
 
         else:
-            print("No new PoGo Assets commit.")
+            print("No new PokeMiners/pogo_assets commit.")
 
+    # Makes the load_data_from_github function now start up until the client is ready
+    @load_data_from_github.before_loop
+    async def before_load_data_from_github(self):
+        await self.client.wait_until_ready()
 
 def setup(client):
     client.add_cog(PoGoAssets(client))
