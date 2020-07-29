@@ -18,6 +18,8 @@ class ShinyEmbed(commands.Cog):
                 image = self.generate_image_link(result)
                 embed = self.generate_embed(ctx, image, result)
                 await ctx.send(embed=embed)
+        elif len(results) == 0:
+            await ctx.send(f"Pokemon `{input}` doesn't exist")
         else:
             image = self.generate_image_link(results[0])
             embed = self.generate_embed(ctx, image, results[0])
@@ -32,6 +34,8 @@ class ShinyEmbed(commands.Cog):
                 image = self.generate_image_link(result, False)
                 embed = self.generate_embed(ctx, image, result)
                 await ctx.send(embed=embed)
+        elif len(results) == 0:
+            await ctx.send(f"Pokemon `{input}` doesn't exist")
         else:
             image = self.generate_image_link(results[0], False)
             embed = self.generate_embed(ctx, image, results[0])
