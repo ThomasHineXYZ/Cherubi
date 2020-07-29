@@ -22,7 +22,6 @@ class ShinyEmbed(commands.Cog):
             image = self.generate_image_link(results[0])
             embed = self.generate_embed(ctx, image, results[0])
             await ctx.send(embed=embed)
-        # await ctx.send(embed=self.post_images())
 
     @commands.command()
     async def normal(self, ctx, *, input):
@@ -52,7 +51,7 @@ class ShinyEmbed(commands.Cog):
             FROM pogo_pokemon
             WHERE (
                 dex = %s
-            )
+            );
         """
         db.execute(query, [input])
         results = db.fetchall()

@@ -1,9 +1,11 @@
 from discord.ext import commands, tasks
-import github
 from lib.mysql import mysql
+import github
 import discord
+import json
 import os
 import re
+import requests
 
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
@@ -45,7 +47,7 @@ class PoGoAssets(commands.Cog):
         query = """
             INSERT INTO checks (name, value)
             VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE value = values(value);
+            ON DUPLICATE KEY UPDATE value = VALUES(value);
         """
         results = db.execute(query, ['pogo_assets_commit_hash', hash])
         db.close()
@@ -56,7 +58,7 @@ class PoGoAssets(commands.Cog):
         query = """
             INSERT INTO pogo_pokemon (dex, type, isotope, filename, shiny)
             VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE shiny = values(shiny);
+            ON DUPLICATE KEY UPDATE shiny = VALUES(shiny);
         """
 
         # Iterate through each of the Pokemon picture files and store them in
@@ -130,10 +132,12 @@ class PoGoAssets(commands.Cog):
             # In case I need to get a different tree_id later:
             # https://stackoverflow.com/questions/25022016/get-all-file-names-from-a-github-repo-through-the-github-api/61656698#61656698
             # https://api.github.com/repos/PokeMiners/pogo_assets/git/trees/master?recursive=1
-            files = repo.get_git_tree("ace98ff9284529e67c1fa3d1548d953596254b6e").tree
 
+            # Store the images of the various Pokemon that are in the repo
+            files = repo.get_git_tree("ace98ff9284529e67c1fa3d1548d953596254b6e").tree
             self.store_pokemon_images(files)
             self.store_commit_hash(commit_hash)
+
             print("New PokeMiners/pogo_assets commit!")
 
         else:
