@@ -5,6 +5,13 @@
 -- Disable foreign key checks until all schema has been created.
 SET FOREIGN_KEY_CHECKS=0;
 
+CREATE TABLE `checks` (
+  `name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`name`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='A table to store checks persistently';
+
 CREATE TABLE `pogo_pokemon` (
   `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',
   `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type to signify a family difference',
