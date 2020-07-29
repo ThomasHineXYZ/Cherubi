@@ -122,6 +122,106 @@ class PoGoAssets(commands.Cog):
 
         return data
 
+    def store_pokemon_name(self, db, dex, language, name):
+        queries = {
+            "chinese": """
+                INSERT INTO pokemon_names_chinese (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "english": """
+                INSERT INTO pokemon_names_english (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "french": """
+                INSERT INTO pokemon_names_french (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "german": """
+                INSERT INTO pokemon_names_german (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "italian": """
+                INSERT INTO pokemon_names_italian (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "japanese": """
+                INSERT INTO pokemon_names_japanese (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "korean": """
+                INSERT INTO pokemon_names_korean (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "portuguese": """
+                INSERT INTO pokemon_names_portuguese (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "spanish": """
+                INSERT INTO pokemon_names_spanish (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+            "thai": """
+                INSERT INTO pokemon_names_thai (dex, name)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name);
+            """,
+        }
+
+        db.execute(queries[language], [dex, bytes(name, 'utf-8').decode()])
+
+    def import_language_files(self):
+        # Import / Update the language files from the repo
+        language_files = {
+            "chinese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_chinesetraditional.json",
+            "english": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_english.json",
+            "french": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_french.json",
+            "german": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_german.json",
+            "italian": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_italian.json",
+            "japanese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_japanese.json",
+            "korean": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_korean.json",
+            "portuguese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_brazilianportuguese.json",
+            "spanish": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_spanish.json",
+            "thai": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_thai.json"
+        }
+
+        # Open a connection to the database and set the query up
+        db = mysql()
+
+        # Iterate through each of the language files that were given above
+        for language, language_file in language_files.items():
+            # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
+            # dictionary, since Niantic is dumb
+            data = requests.get(language_file).text
+            dump = json.loads(data.encode('utf-8'))
+            json_dictionary = dict(
+                zip(
+                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 0],
+                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 1]
+                )
+            )
+
+            # Iterate through the json_dictionary to find the values that we want
+            for json_key, json_value in json_dictionary.items():
+
+                # If it is a a Pokemon name
+                # pokemon_name_0001
+                if json_key.startswith("pokemon_name_"):
+                    dex = json_key[13:]
+                    self.store_pokemon_name(db, dex, language, json_value)
+
+
+        # Finally close the connection
+        db.close()
+
     @tasks.loop(hours = 12)
     async def load_data_from_github(self):
         repo = self.github.get_repo("PokeMiners/pogo_assets")
@@ -137,6 +237,9 @@ class PoGoAssets(commands.Cog):
             files = repo.get_git_tree("ace98ff9284529e67c1fa3d1548d953596254b6e").tree
             self.store_pokemon_images(files)
             self.store_commit_hash(commit_hash)
+
+            # Import the various language files in case there are any changes
+            self.import_language_files()
 
             print("New PokeMiners/pogo_assets commit!")
 
