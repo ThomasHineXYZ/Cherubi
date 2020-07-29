@@ -33,7 +33,6 @@ class ShinyEmbed(commands.Cog):
                 embed = self.generate_embed(ctx, image, result)
                 await ctx.send(embed=embed)
         else:
-            print(results)
             image = self.generate_image_link(results[0], False)
             embed = self.generate_embed(ctx, image, results[0])
             await ctx.send(embed=embed)
@@ -43,18 +42,31 @@ class ShinyEmbed(commands.Cog):
         db = mysql()
         query = """
             SELECT
-                dex,
-                type,
-                isotope,
-                filename,
-                shiny
-            FROM pogo_pokemon
+                pkmn.dex AS 'dex',
+                name.english AS 'name',
+                pkmn.type AS 'type',
+                pkmn.isotope AS 'isotope',
+                pkmn.filename AS 'filename',
+                pkmn.shiny AS 'shiny'
+            FROM pogo_pokemon pkmn
+            LEFT JOIN pokemon_names name on name.dex = pkmn.dex
             WHERE (
-                dex = %s
+                pkmn.dex = %s OR
+                name.chinese = %s OR
+                name.english = %s OR
+                name.french = %s OR
+                name.german = %s OR
+                name.italian = %s OR
+                name.japanese = %s OR
+                name.korean = %s OR
+                name.portuguese = %s OR
+                name.spanish = %s OR
+                name.thai = %s
             );
         """
-        db.execute(query, [input])
+        db.execute(query, [input, input, input, input, input, input, input, input, input, input, input])
         results = db.fetchall()
+        print(results)
         db.close()
 
         return results
@@ -69,20 +81,20 @@ class ShinyEmbed(commands.Cog):
         url += "pokemon_icon_"
 
         # Checks if a unique file name exists for the Pokemon
-        if result[3] == None: # If no specific file name is given
+        if result[4] == None: # If no specific file name is given
             # Give it some leading zeroes
             dex = str(result[0]).zfill(3)
 
             # base_url + pokemon_icon_{dex}{type}{isotope or ''}_shiny.png
-            url += f"{dex}_{result[1]}"
+            url += f"{dex}_{result[2]}"
 
             # If there's an isotope value, add it
-            if result[2]:
-                url += f"_{result[2]}"
+            if result[3]:
+                url += f"_{result[3]}"
 
         else:
             # base_url + pokemon_icon_{fn}_shiny.png
-            url = base_url + f"pokemon_icon_{result[3]}"
+            url = base_url + f"pokemon_icon_{result[4]}"
 
         # If it's shiny, add in that little bit
         if shiny:
@@ -97,7 +109,7 @@ class ShinyEmbed(commands.Cog):
         # Cherubi green: 0x2FA439
         # Cherubi pink: 0xE66479
         embed = discord.Embed(
-            title = f"<Name Here>",
+            title = f"{result[1]}",
             description = f"National Dex #{str(result[0]).zfill(3)}",
             colour = 0x2FA439,
             timestamp=datetime.utcnow()
@@ -106,7 +118,7 @@ class ShinyEmbed(commands.Cog):
         embed.set_author(name="Shiny Checker", icon_url="https://images.weserv.nl/?trim=10&url=https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/pokemon_icon_420_00.png")
         embed.set_thumbnail(url=image)
 
-        embed.add_field(name="Shiny Exists?", value=bool(result[4]), inline=True)
+        embed.add_field(name="Shiny Exists?", value=bool(result[5]), inline=True)
 
         # if result[4]:
         #     embed.add_field(name="Date Released:", value=result[4], inline=True)
