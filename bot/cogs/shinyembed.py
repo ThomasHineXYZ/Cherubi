@@ -10,6 +10,7 @@ class ShinyEmbed(commands.Cog):
         self.client = client
 
     @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def shiny(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:
@@ -28,6 +29,7 @@ class ShinyEmbed(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def normal(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:

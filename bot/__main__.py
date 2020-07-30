@@ -18,15 +18,12 @@ if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
 # Sets the guild preferences for the guilds
-def set_default_preferences(guild_id):
-    db = mysql()
+def set_default_preferences(db, guild_id):
     query = """
-        INSERT INTO preferences (guild, command_prefix)
-        VALUES (%s, %s)
-        ON DUPLICATE KEY UPDATE guild = guild;
+        INSERT IGNORE INTO preferences (guild, command_prefix)
+        VALUES (%s, %s);
     """
     db.execute(query, [guild_id, os.environ['COMMAND_PREFIX']])
-    db.close()
 
 # Set the prefixes for each of the guilds
 prefixes = {}
@@ -34,7 +31,6 @@ def get_prefix(client, message):
     # If their prefix isn't in the list for some reason, re-run
     global prefixes
     if message.guild.id not in prefixes:
-        set_default_preferences(message.guild.id)
         db = mysql()
         query = """
             SELECT
@@ -98,9 +94,10 @@ async def on_command_error(ctx, exc):
 @client.event
 async def on_guild_join(guild):
     print(f"Joined guild: {guild.id} / {guild.name}")
-
     # Set the default preferences for a guild upon joining
-    set_default_preferences(guild.id)
+    db = mysql()
+    set_default_preferences(db, guild.id)
+    db.close()
 
 @client.event
 async def on_guild_remove(guild):
@@ -114,6 +111,23 @@ async def on_guild_remove(guild):
     """
     db.execute(query, [guild.id])
     db.close()
+
+@client.event
+async def on_connect():
+    db = mysql()
+
+    # Whenever the bot connects up to Discord double check that at least the
+    # default preferences are set for each guild it is in
+    for guild in client.guilds:
+        set_default_preferences(db, guild.id)
+
+    db.close()
+
+    print("Bot Connected")
+
+@client.event
+async def on_disconnect():
+    print("Bot Disconnected")
 
 @client.command()
 @commands.cooldown(1, 10, commands.BucketType.guild)

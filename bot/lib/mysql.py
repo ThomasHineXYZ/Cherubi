@@ -53,6 +53,9 @@ class mysql():
     def execute(self, sql, params=None):
         self.cursor.execute(sql, params or ())
 
+    def executemany(self, sql, params=None):
+        self.cursor.executemany(sql, params or ())
+
     def fetchall(self):
         return self.cursor.fetchall()
 
