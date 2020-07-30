@@ -36,7 +36,7 @@ class PoGoAssets(commands.Cog):
 
         # If the grabbed commit hash equals the one that we have stored, it's
         # not a new commit
-        if results[0][0] == hash:
+        if results[0]['value'] == hash:
             return False
 
         # Otherwise just assume it's a new commit, it shouldn't hurt anything

@@ -45,12 +45,8 @@ def get_prefix(client, message):
         """
         prefix_list = db.query(query)
         db.close()
-        for guild, prefix in prefix_list:
-            prefixes[guild] = prefix
-
-    # If the guild still isn't in the prefixes list, throw an error
-    if message.guild.id not in prefixes:
-        raise ValueError(f"{message.guild.id} doesn't have an entry in the preferences table")
+        for prefix in prefix_list:
+            prefixes[prefix['guild']] = prefix['command_prefix']
 
     # Return their prefix from the prefixes dictionary
     return prefixes[message.guild.id]

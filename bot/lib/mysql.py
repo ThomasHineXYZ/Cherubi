@@ -26,7 +26,7 @@ class mysql():
             database=os.environ['MYSQL_DBNAME'],
             port=os.environ['MYSQL_PORT']
         )
-        self._cursor = self._db.cursor()
+        self._cursor = self._db.cursor(dictionary=True)
 
     def __enter__(self):
         return self
