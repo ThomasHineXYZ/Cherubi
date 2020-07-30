@@ -56,7 +56,7 @@ class PoGoAssets(commands.Cog):
         # Open a connection to the database and set the query up
         db = mysql()
         query = """
-            INSERT INTO pogo_pokemon (dex, type, isotope, filename, shiny)
+            INSERT INTO pokemon (dex, type, isotope, filename, shiny)
             VALUES (%s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE shiny = VALUES(shiny);
         """
@@ -123,60 +123,64 @@ class PoGoAssets(commands.Cog):
         return data
 
     def store_pokemon_name(self, db, dex, language, name):
-        queries = {
-            "chinese": """
-                INSERT INTO pokemon_names_chinese (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "english": """
-                INSERT INTO pokemon_names_english (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "french": """
-                INSERT INTO pokemon_names_french (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "german": """
-                INSERT INTO pokemon_names_german (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "italian": """
-                INSERT INTO pokemon_names_italian (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "japanese": """
-                INSERT INTO pokemon_names_japanese (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "korean": """
-                INSERT INTO pokemon_names_korean (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "portuguese": """
-                INSERT INTO pokemon_names_portuguese (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "spanish": """
-                INSERT INTO pokemon_names_spanish (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
-            "thai": """
-                INSERT INTO pokemon_names_thai (dex, name)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name);
-            """,
+        # Create a language dictionary, setting everything as NULL to start.
+        name_list = {
+            "chinese": None,
+            "english": None,
+            "french": None,
+            "german": None,
+            "italian": None,
+            "japanese": None,
+            "korean": None,
+            "portuguese": None,
+            "spanish": None,
+            "thai": None,
         }
 
-        db.execute(queries[language], [dex, bytes(name, 'utf-8').decode()])
+        # Set the language that we worked on as the name we grabbed
+        name_list[language] = name
+
+        query = """
+            INSERT INTO pokemon_names (
+                dex,
+                chinese,
+                english,
+                french,
+                german,
+                italian,
+                japanese,
+                korean,
+                portuguese,
+                spanish,
+                thai
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                chinese = COALESCE(VALUES(chinese), chinese),
+                english = COALESCE(VALUES(english), english),
+                french = COALESCE(VALUES(french), french),
+                german = COALESCE(VALUES(german), german),
+                italian = COALESCE(VALUES(italian), italian),
+                japanese = COALESCE(VALUES(japanese), japanese),
+                korean = COALESCE(VALUES(korean), korean),
+                portuguese = COALESCE(VALUES(portuguese), portuguese),
+                spanish = COALESCE(VALUES(spanish), spanish),
+                thai = COALESCE(VALUES(thai), thai);
+        """
+
+        db.execute(query, [
+            dex,
+            name_list['chinese'],
+            name_list['english'],
+            name_list['french'],
+            name_list['german'],
+            name_list['italian'],
+            name_list['japanese'],
+            name_list['korean'],
+            name_list['portuguese'],
+            name_list['spanish'],
+            name_list['thai'],
+        ])
 
     def import_language_files(self):
         # Import / Update the language files from the repo

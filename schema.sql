@@ -12,7 +12,7 @@ CREATE TABLE `checks` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='A table to store checks persistently';
 
-CREATE TABLE `pogo_pokemon` (
+CREATE TABLE `pokemon` (
   `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',
   `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type to signify a family difference',
   `isotope` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The isotype ID of the Pokemon',

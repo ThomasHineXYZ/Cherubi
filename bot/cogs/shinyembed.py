@@ -52,7 +52,7 @@ class ShinyEmbed(commands.Cog):
                 pkmn.isotope AS 'isotope',
                 pkmn.filename AS 'filename',
                 pkmn.shiny AS 'shiny'
-            FROM pogo_pokemon pkmn
+            FROM pokemon pkmn
             LEFT JOIN pokemon_names name on name.dex = pkmn.dex
             WHERE (
                 pkmn.dex = %s OR
@@ -70,7 +70,6 @@ class ShinyEmbed(commands.Cog):
         """
         db.execute(query, [input, input, input, input, input, input, input, input, input, input, input])
         results = db.fetchall()
-        print(results)
         db.close()
 
         return results
