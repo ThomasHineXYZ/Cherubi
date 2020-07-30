@@ -15,14 +15,16 @@ class ShinyEmbed(commands.Cog):
         if len(results) > 1:
             #TODO make a selection for people to choose which one they mean
             for result in results:
-                image = self.generate_image_link(result)
-                embed = self.generate_embed(ctx, image, result)
+                sprite = self.generate_sprite_link(result, True)
+                image = self.generate_image_link(result, True)
+                embed = self.generate_embed(ctx, sprite, image, result)
                 await ctx.send(embed=embed)
         elif len(results) == 0:
             await ctx.send(f"Pokemon `{input}` doesn't exist")
         else:
+            sprite = self.generate_sprite_link(result)
             image = self.generate_image_link(results[0])
-            embed = self.generate_embed(ctx, image, results[0])
+            embed = self.generate_embed(ctx, sprite, image, results[0])
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -31,14 +33,16 @@ class ShinyEmbed(commands.Cog):
         if len(results) > 1:
             #TODO make a selection for people to choose which one they mean
             for result in results:
-                image = self.generate_image_link(result, False)
-                embed = self.generate_embed(ctx, image, result)
+                sprite = self.generate_sprite_link(result)
+                image = self.generate_image_link(result)
+                embed = self.generate_embed(ctx, sprite, image, result)
                 await ctx.send(embed=embed)
         elif len(results) == 0:
             await ctx.send(f"Pokemon `{input}` doesn't exist")
         else:
-            image = self.generate_image_link(results[0], False)
-            embed = self.generate_embed(ctx, image, results[0])
+            sprite = self.generate_sprite_link(result)
+            image = self.generate_image_link(results[0])
+            embed = self.generate_embed(ctx, sprite, image, results[0])
             await ctx.send(embed=embed)
         # await ctx.send(embed=self.post_images())
 
@@ -74,7 +78,7 @@ class ShinyEmbed(commands.Cog):
 
         return results
 
-    def generate_image_link(self, result, shiny = True):
+    def generate_image_link(self, result, shiny = False):
         # Base url for the repo, plus an image cacher link, if we are using it
         base_url = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/"
         cache_link = "https://images.weserv.nl/?url="
@@ -97,7 +101,7 @@ class ShinyEmbed(commands.Cog):
 
         else:
             # base_url + pokemon_icon_{fn}_shiny.png
-            url = base_url + f"pokemon_icon_{result['filename']}"
+            url += result['filename']
 
         # If it's shiny, add in that little bit
         if shiny:
@@ -108,7 +112,28 @@ class ShinyEmbed(commands.Cog):
 
         return cache_link + url
 
-    def generate_embed(self, ctx, image, result):
+    def generate_sprite_link(self, result, shiny = False):
+        # Base url for the repo, plus an image cacher link, if we are using it
+        base_url = "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/"
+        cache_link = "https://images.weserv.nl/?trim=10&url="
+
+        url = ""
+        url += base_url
+
+        # If it's shiny, add in that little bit
+        if shiny:
+            url += "shiny/"
+        else:
+            url += "regular/"
+
+        url += result['name'].lower()
+
+        # Finally, add in the file extension
+        url += ".png"
+
+        return cache_link + url
+
+    def generate_embed(self, ctx, sprite, image, result):
         # Cherubi green: 0x2FA439
         # Cherubi pink: 0xE66479
         embed = discord.Embed(
@@ -118,7 +143,9 @@ class ShinyEmbed(commands.Cog):
             timestamp=datetime.utcnow()
         )
 
-        embed.set_author(name="Shiny Checker", icon_url="https://images.weserv.nl/?trim=10&url=https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/pokemon_icon_420_00.png")
+        # Set the name as "Shiny Checker", for now. Also set the icon like the
+        # little in-game sprites from the main series games
+        embed.set_author(name="Shiny Checker", icon_url=sprite)
         embed.set_thumbnail(url=image)
 
         embed.add_field(name="Shiny Exists?", value=bool(result['shiny']), inline=True)
