@@ -28,8 +28,15 @@ def set_default_preferences(db, guild_id):
 # Set the prefixes for each of the guilds
 prefixes = {}
 def get_prefix(client, message):
-    # If their prefix isn't in the list for some reason, re-run
+    # Link the prefixes variable in this function to the global one, so it
+    # all updates
     global prefixes
+
+    # If it is a DM from a user, use these
+    if isinstance(message.channel, discord.DMChannel):
+        return ("!", "?", ".", "$")
+
+    # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
         db = mysql()
         query = """
@@ -135,6 +142,7 @@ async def ping(ctx):
     await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
 
 @client.command()
+@commands.guild_only()
 @commands.is_owner()
 async def changeprefix(ctx, prefix):
     # If someone tries to set more than a single character
