@@ -11,7 +11,7 @@ class ShinyEmbed(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
-    async def shiny(self, ctx, *, input):
+    async def shinyembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:
             #TODO make a selection for people to choose which one they mean
@@ -30,7 +30,7 @@ class ShinyEmbed(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
-    async def normal(self, ctx, *, input):
+    async def normalembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:
             #TODO make a selection for people to choose which one they mean

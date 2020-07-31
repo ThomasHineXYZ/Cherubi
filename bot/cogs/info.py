@@ -8,10 +8,16 @@ class Info(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    def is_guild_owner():
+        def predicate(ctx):
+            return ctx.guild is not None and ctx.guild.owner_id == ctx.author.id
+        return commands.check(predicate)
+
     @commands.command(name="userinfo", aliases=["memberinfo", "ui", "mi"])
     @commands.guild_only()
-    @commands.is_owner()
+    @commands.check_any(commands.is_owner(), is_guild_owner())
     async def user_info(self, ctx, target: Optional[discord.Member]):
+        # If no target is given, use the user who wrote the command
         target = target or ctx.author
 
         embed = discord.Embed(
@@ -43,7 +49,7 @@ class Info(commands.Cog):
 
     @commands.command(name="serverinfo", aliases=["guildinfo", "si", "gi"])
     @commands.guild_only()
-    @commands.is_owner()
+    @commands.check_any(commands.is_owner(), is_guild_owner())
     async def server_info(self, ctx):
         embed = discord.Embed(
             title="Server Information",

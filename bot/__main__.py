@@ -32,9 +32,10 @@ def get_prefix(client, message):
     # all updates
     global prefixes
 
-    # If it is a DM from a user, use these
+    # If it is a DM from a user, use these. "" needs to be on the very end of
+    # the previous prefixes won't work.
     if isinstance(message.channel, discord.DMChannel):
-        return ("!", ".", "?", "$", "%", ":", ";", ">")
+        return ("!", ".", "?", "$", "%", ":", ";", ">", "")
 
     # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
@@ -52,10 +53,20 @@ def get_prefix(client, message):
             prefixes[prefix['guild']] = prefix['command_prefix']
 
     # Return their prefix from the prefixes dictionary
-    return prefixes[message.guild.id]
+    return commands.when_mentioned_or(*prefixes[message.guild.id])(client, message)
+
+def is_guild_owner():
+    def predicate(ctx):
+        return ctx.guild is not None and ctx.guild.owner_id == ctx.author.id
+    return commands.check(predicate)
 
 # Start up the bot
-client = commands.Bot(command_prefix = get_prefix)
+client = commands.Bot(
+    command_prefix = get_prefix,
+    description = "Cherubi Bot for Pokemon Go Servers",
+    owner_id = int(os.environ['BOT_AUTHOR']),
+    status = discord.Status.dnd
+)
 
 @client.event
 async def on_ready():
@@ -143,7 +154,7 @@ async def ping(ctx):
 
 @client.command()
 @commands.guild_only()
-@commands.is_owner()
+@commands.check_any(commands.is_owner(), is_guild_owner())
 async def changeprefix(ctx, prefix):
     # If someone tries to set more than a single character
     if len(prefix) > 1:
@@ -170,18 +181,21 @@ async def changeprefix(ctx, prefix):
 # Debug commands meant for when working on the bot
 if os.environ['DEBUG'].lower() == "true":
     @client.command()
+    @commands.is_owner()
     async def load(ctx, extension):
         print(f"Loading {extension}")
         await ctx.send(f"Loading {extension}")
         client.load_extension(f"cogs.{extension}")
 
     @client.command()
+    @commands.is_owner()
     async def unload(ctx, extension):
         print(f"Unloading {extension}")
         await ctx.send(f"Unloading {extension}")
         client.unload_extension(f"cogs.{extension}")
 
     @client.command()
+    @commands.is_owner()
     async def reload(ctx, extension):
         print(f"Reloading {extension}")
         await ctx.send(f"Reloading {extension}")
