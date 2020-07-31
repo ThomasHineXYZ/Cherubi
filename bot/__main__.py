@@ -34,7 +34,7 @@ def get_prefix(client, message):
 
     # If it is a DM from a user, use these
     if isinstance(message.channel, discord.DMChannel):
-        return ("!", "?", ".", "$")
+        return ("!", ".", "?", "$", "%", ":", ";", ">")
 
     # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
