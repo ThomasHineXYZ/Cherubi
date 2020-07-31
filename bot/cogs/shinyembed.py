@@ -112,7 +112,7 @@ class ShinyEmbed(commands.Cog):
         # Finally, add in the file extension
         url += ".png"
 
-        return cache_link + url
+        return url
 
     def generate_sprite_link(self, result, shiny = False):
         # Base url for the repo, plus an image cacher link, if we are using it
