@@ -15,8 +15,9 @@ class Checklist(commands.Cog):
         usage = "<add | remove | list>"
     )
     async def shiny_group(self, ctx):
+        # If no subcommand is given, give the help command for the group
         if ctx.invoked_subcommand is None:
-            await ctx.send("test?")
+            await ctx.send_help(str(ctx.command))
 
     @shiny_group.command(
         name = "add",

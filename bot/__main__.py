@@ -89,6 +89,7 @@ async def on_command_error(ctx, exc):
 
     elif isinstance(exc, commands.MissingRequiredArgument):
         await ctx.send("One or more required arguments are missing.")
+        await ctx.send_help(str(ctx.command))
 
     elif isinstance(exc, commands.CommandOnCooldown):
         await ctx.send(f"That command is on {str(exc.cooldown.type).split('.')[-1]} cooldown. Try again in {exc.retry_after:,.2f} secs.")
