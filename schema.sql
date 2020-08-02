@@ -48,6 +48,19 @@ CREATE TABLE `preferences` (
   KEY `index_guild` (`guild`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Specific Guild Preferences';
 
+CREATE TABLE `user_shinies` (
+  `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
+  `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',
+  `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type to signify a family difference',
+  `isotope` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The isotype ID of the Pokemon',
+  `count` int(4) unsigned NOT NULL COMMENT 'The count of how many the user has',
+  PRIMARY KEY (`user_id`,`dex`,`type`,`isotope`),
+  UNIQUE KEY `user_id_dex_type_isotope` (`user_id`,`dex`,`type`,`isotope`),
+  KEY `dex` (`dex`,`type`,`isotope`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `user_shinies_ibfk_3` FOREIGN KEY (`dex`, `type`, `isotope`) REFERENCES `pokemon` (`dex`, `type`, `isotope`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Enable foreign key checks.
 SET FOREIGN_KEY_CHECKS=1;
 # EOF
