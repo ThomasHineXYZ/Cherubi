@@ -77,7 +77,7 @@ async def on_ready():
 
     else:
         await status.set_status("online")
-        await status.set_activity("listening your input.")
+        await status.set_activity(f"listening your input. Helping ~{len(client.guilds)} servers and ~{len(client.users)} users.")
 
     print("Bot is ready.")
 
