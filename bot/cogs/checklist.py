@@ -32,9 +32,19 @@ class Checklist(commands.Cog):
     async def add_subcommand(self, ctx, pokemon, count = 1):
         # Just a couple of sanity checks, since I know someone will test this at some point
         if count == 0:
-            ctx.sent("You can't add 0 of something.")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = "Shiny Checklist",
+                content = "You can't add 0 of something.",
+            ))
+            return
         elif count < 0:
-            ctx.sent("There is no such thing as negative Pokemon. At least... not yet.")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = "Shiny Checklist",
+                content = "There is no such thing as negative Pokemon. At least... not yet.",
+            ))
+            return
 
         # Grab the list of Pokemon for the given name or dex number
         pokemon_data = self.get_pokemon_data(pokemon)
@@ -44,10 +54,18 @@ class Checklist(commands.Cog):
         # If there is more than one returned value... right now it's a WIP and needs to be dealt with
         # If there is only one response returned than work for it
         if not pokemon_data:
-            await ctx.send(f"Pokemon `{pokemon}` doesn't exist")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "warning",
+                title = "Shiny Checklist",
+                content = f"Pokemon `{pokemon}` doesn't exist",
+            ))
             return
         elif len(pokemon_data) > 1: # WIP Not implemented right now
-            await ctx.send(f"Pokemon with multiple forms or variants aren't supported right now.")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "warning",
+                title = "Shiny Checklist",
+                content = "Pokemon with multiple forms, costumes, or variants aren't supported right now.",
+            ))
             return
         else:
             db = mysql()
@@ -64,7 +82,14 @@ class Checklist(commands.Cog):
                 count,
             ])
             db.close()
-            await ctx.send(f"Added {count} {pokemon_data[0]['name']} to your list")
+
+            # Tell the user that they added the Pokemon successfully to their list
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "success",
+                title = "Shiny Checklist",
+                content = f"Added {count} shiny {pokemon_data[0]['name']} to your list",
+                thumbnail = self.generate_image_link(pokemon_data[0], shiny = True)
+            ))
 
     @shiny_group.command(
         name = "remove",
@@ -77,16 +102,29 @@ class Checklist(commands.Cog):
     async def remove_subcommand(self, ctx, pokemon, count = 1):
         # Just a couple of sanity checks, since I know someone will test this at some point
         if count == 0:
-            ctx.sent("You can't remove 0 of something.")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = "Shiny Checklist",
+                content = "You can't remove 0 of something.",
+            ))
+            return
         elif count < 0:
             count = count * -1
 
         pokemon_data = self.get_pokemon_data(pokemon)
         if not pokemon_data:
-            await ctx.send(f"Pokemon `{input}` doesn't exist")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "warning",
+                title = "Shiny Checklist",
+                content = f"Pokemon `{pokemon}` doesn't exist",
+            ))
             return
         elif len(pokemon_data) > 1: # WIP Not implemented right now
-            await ctx.send(f"Pokemon with multiple forms or variants aren't supported right now.")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "warning",
+                title = "Shiny Checklist",
+                content = "Pokemon with multiple forms, costumes, or variants aren't supported right now.",
+            ))
             return
         else:
             db = mysql()
@@ -114,7 +152,12 @@ class Checklist(commands.Cog):
             result = db.fetchone()
             if (not result) or (result['count'] == 0):
                 db.close()
-                await ctx.send(f"You don't have any {pokemon_data[0]['name']} in your list")
+                await ctx.send(embed = lib.embedder.make_embed(
+                    type = "warning",
+                    title = "Shiny Checklist",
+                    content = f"You don't have any shiny {pokemon_data[0]['name']} in your list to remove",
+                    thumbnail = self.generate_image_link(pokemon_data[0], shiny = True)
+                ))
                 return
             elif result['count'] < count:
                 count = result['count']
@@ -137,7 +180,13 @@ class Checklist(commands.Cog):
                 pokemon_data[0]['isotope'],
             ])
             db.close()
-            await ctx.send(f"Removed {count} {pokemon_data[0]['name']} from your list")
+
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "success",
+                title = "Shiny Checklist",
+                content = f"Removed {count} shiny {pokemon_data[0]['name']} from your list",
+                thumbnail = self.generate_image_link(pokemon_data[0], shiny = True)
+            ))
 
     @shiny_group.command(
         name = "list",
@@ -171,7 +220,11 @@ class Checklist(commands.Cog):
 
         # If the user doesn't have any shiny Pokemon in their list, tell them that
         if not results:
-            await ctx.send(f"Unfortunately {target.display_name} doesn't have any Pokemon in your shiny list...")
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = "Shiny Checklist",
+                content = f"Unfortunately {target.display_name} doesn't have any Pokemon in your shiny list...",
+            ))
 
         else:
             columns = {"left": "", "right": ""}
@@ -264,6 +317,39 @@ class Checklist(commands.Cog):
         db.close()
 
         return results
+
+    def generate_image_link(self, result, shiny = False):
+        # Base url for the repo, plus an image cacher link, if we are using it
+        base_url = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/"
+
+        url = ""
+        url += base_url
+        url += "pokemon_icon_"
+
+        # Checks if a unique file name exists for the Pokemon
+        if result['filename'] == None: # If no specific file name is given
+            # Give it some leading zeroes
+            dex = str(result['dex']).zfill(3)
+
+            # base_url + pokemon_icon_{dex}{type}{isotope or ''}_shiny.png
+            url += f"{dex}_{result['type']}"
+
+            # If there's an isotope value, add it
+            if result['isotope']:
+                url += f"_{result['isotope']}"
+
+        else:
+            # base_url + pokemon_icon_{fn}_shiny.png
+            url += result['filename']
+
+        # If it's shiny, add in that little bit
+        if shiny:
+            url += "_shiny"
+
+        # Finally, add in the file extension
+        url += ".png"
+
+        return url
 
 def setup(client):
     client.add_cog(Checklist(client))
