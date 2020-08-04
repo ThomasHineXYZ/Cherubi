@@ -20,7 +20,7 @@ if os.path.isfile(local_env_file_name):
 # Sets the guild preferences for the guilds
 def set_default_preferences(db, guild_id):
     query = """
-        INSERT IGNORE INTO preferences (guild, command_prefix)
+        INSERT IGNORE INTO guild_preferences (guild, command_prefix)
         VALUES (%s, %s);
     """
     db.execute(query, [guild_id, os.environ['COMMAND_PREFIX']])
@@ -45,7 +45,7 @@ def get_prefix(client, message):
                 guild,
                 command_prefix
 
-            FROM preferences;
+            FROM guild_preferences;
         """
         prefix_list = db.query(query)
         db.close()
@@ -125,7 +125,7 @@ async def on_guild_remove(guild):
     # Removes the preferences line for a guild
     db = mysql()
     query = """
-        DELETE FROM preferences
+        DELETE FROM guild_preferences
         WHERE guild = %s;
     """
     db.execute(query, [guild.id])
@@ -165,7 +165,7 @@ async def changeprefix(ctx, prefix):
     # Store the character in the preferences table
     db = mysql()
     query = """
-        UPDATE preferences
+        UPDATE guild_preferences
         SET command_prefix = %s
         WHERE guild = %s;
     """

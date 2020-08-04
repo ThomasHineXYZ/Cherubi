@@ -12,6 +12,14 @@ CREATE TABLE `checks` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='A table to store checks persistently';
 
+CREATE TABLE `guild_preferences` (
+  `guild` bigint(20) NOT NULL COMMENT 'Discord Guild ID',
+  `command_prefix` char(1) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The character that is the prefix of commands',
+  PRIMARY KEY (`guild`),
+  UNIQUE KEY `guild` (`guild`),
+  KEY `index_guild` (`guild`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Specific Guild Preferences';
+
 CREATE TABLE `pokemon` (
   `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',
   `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type to signify a family difference',
@@ -39,14 +47,6 @@ CREATE TABLE `pokemon_names` (
   UNIQUE KEY `dex` (`dex`),
   KEY `dex_index` (`dex`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `preferences` (
-  `guild` bigint(20) NOT NULL COMMENT 'Discord Guild ID',
-  `command_prefix` char(1) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The character that is the prefix of commands',
-  PRIMARY KEY (`guild`),
-  UNIQUE KEY `guild` (`guild`),
-  KEY `index_guild` (`guild`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Specific Guild Preferences';
 
 CREATE TABLE `user_shinies` (
   `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
