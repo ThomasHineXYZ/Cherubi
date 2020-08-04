@@ -71,7 +71,7 @@ class Info(commands.Cog):
             ("Owner", ctx.guild.owner, True),
             ("Created At", ctx.guild.created_at.strftime("%Y-%m-%d %H:%M:%S"), True),
             ("Members", len(ctx.guild.members), True),
-            ("Statuses", f":green_circle: {statuses['online']} :orange_circle: {statuses['idle']} :red_circle: {statuses['dnd']} :black_circle: {statuses['offline']} ", True),
+            ("Statuses", f"🟢 {statuses['online']} | 🟠 {statuses['idle']} | 🔴 {statuses['dnd']} | ⚫ {statuses['offline']} ", True),
             ("Categories", len(ctx.guild.categories), True),
             ("Emoji Count", len(ctx.guild.emojis), True),
             ("Text Channels", len(ctx.guild.text_channels), True),

@@ -163,11 +163,17 @@ class Checklist(commands.Cog):
         """
         results = db.query(query, [ctx.message.author.id])
         db.close()
-        output = ""
-        for result in results:
-            output += f"{result['name']}: {result['count']}\n"
 
-        await ctx.send(output)
+        # If the user doesn't have any shiny Pokemon in their list, tell them that
+        if not results:
+            await ctx.send("Unfortunately you don't have any Pokemon in your shiny list...")
+
+        else:
+            output = ""
+            for result in results:
+                output += f"{result['name']}: {result['count']}\n"
+
+            await ctx.send(output)
 
     @shiny_group.command(
         name = "leaderboard",
