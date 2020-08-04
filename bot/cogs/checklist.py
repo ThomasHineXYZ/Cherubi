@@ -1,6 +1,8 @@
 from discord.ext import commands
 from lib.mysql import mysql
+from typing import Optional
 import discord
+import lib.embedder
 import os
 
 class Checklist(commands.Cog):
@@ -145,7 +147,10 @@ class Checklist(commands.Cog):
         help = "This lists off all of the shiny Pokemon in your collection."
     )
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def list_subcommand(self, ctx):
+    async def list_subcommand(self, ctx, target: Optional[discord.Member]):
+        # If no target is given, use the user who wrote the command
+        target = target or ctx.author
+
         db = mysql()
         query = """
             SELECT
@@ -161,19 +166,32 @@ class Checklist(commands.Cog):
                 AND user_shiny.count > 0
             ORDER BY name.english;
         """
-        results = db.query(query, [ctx.message.author.id])
+        results = db.query(query, [target.id])
         db.close()
 
         # If the user doesn't have any shiny Pokemon in their list, tell them that
         if not results:
-            await ctx.send("Unfortunately you don't have any Pokemon in your shiny list...")
+            await ctx.send(f"Unfortunately {target.display_name} doesn't have any Pokemon in your shiny list...")
 
         else:
-            output = ""
+            columns = {"left": "", "right": ""}
+            total_count = 0
             for result in results:
-                output += f"{result['name']}: {result['count']}\n"
+                columns['left'] += f"{result['name']}\n"
+                columns['right'] += f"{result['count']}\n"
+                total_count += result['count']
 
-            await ctx.send(output)
+            fields = [
+                ("Pokemon", columns['left'], True),
+                ("Count", columns['right'], True),
+                ("Total:", total_count, False),
+            ]
+
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "info",
+                title = f"{target.display_name}'s Shiny List:",
+                fields = fields,
+            ))
 
     @shiny_group.command(
         name = "leaderboard",

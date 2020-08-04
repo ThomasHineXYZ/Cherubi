@@ -71,7 +71,7 @@ def make_embed(
     icon = None,
     image = '',
     thumbnail = '',
-    title_name = None,
+    title = None,
     title_url = None,
     type = ''
 ):
@@ -117,7 +117,6 @@ def make_embed(
     if icon:
         embed_icon = icon
     elif type and type in types.keys():
-        print(f"Type {types[type]['icon']} chosen")
         embed_icon = types[type]['icon']
     else:
         embed_icon = discord.Embed.Empty
@@ -134,7 +133,7 @@ def make_embed(
         timestamp = datetime.utcnow()
     )
 
-    embed.set_author(name=title_name, icon_url=embed_icon, url=title_url)
+    embed.set_author(name=title, icon_url=embed_icon, url=title_url)
 
     # If a thumbnail or main image URL is given, show it!
     if thumbnail:
