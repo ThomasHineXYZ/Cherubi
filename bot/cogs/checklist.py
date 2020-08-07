@@ -246,46 +246,6 @@ class Checklist(commands.Cog):
                 fields = fields,
             ))
 
-    @shiny_group.command(
-        name = "leaderboard",
-        brief = "Lists the shiny Pokemon that you have.",
-        description = "Cherubi Bot - Shiny Checklist System (List)",
-        help = "This lists off all of the shiny Pokemon in your collection."
-    )
-    @commands.guild_only()
-    @commands.cooldown(1, 10, commands.BucketType.guild)
-    async def leaderboard_subcommand(self, ctx):
-        # WIP need to add in an option for global and guild specific. Right now
-        # it is just global
-        db = mysql()
-        query = """
-            SELECT
-                user_id,
-                SUM(count) AS total
-            FROM user_shinies
-            GROUP BY user_id
-            ORDER BY total DESC
-            LIMIT 25;
-        """
-        results = db.query(query)
-        db.close()
-
-        columns = {"left": "", "right": ""}
-        for result in results:
-            columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
-            columns['right'] += f"{result['total']}\n"
-
-        fields = [
-            ("Name", columns['left'], True),
-            ("Count", columns['right'], True),
-        ]
-
-        await ctx.send(embed = lib.embedder.make_embed(
-            type = "info",
-            title = "Global Shiny Leaderboard",
-            fields = fields,
-        ))
-
     def get_pokemon_data(self, input):
         db = mysql()
         query = """
