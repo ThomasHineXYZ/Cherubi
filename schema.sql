@@ -48,6 +48,14 @@ CREATE TABLE `pokemon_names` (
   KEY `dex_index` (`dex`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `user_preferences` (
+  `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
+  `home_guild` bigint(20) unsigned NOT NULL COMMENT 'The users home guild ID',
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `user_id` (`user_id`),
+  KEY `user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Storage for user specific settings';
+
 CREATE TABLE `user_shinies` (
   `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
   `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',

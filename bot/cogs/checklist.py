@@ -30,6 +30,24 @@ class Checklist(commands.Cog):
         help = "You can give either the name or the dex number of the Pokemon to add it to your list.\n\nYou also can give an amount, if you don't it'll add a single one."
     )
     async def add_subcommand(self, ctx, pokemon, count = 1):
+        # Check that the user has their home guild set. If not, then set it.
+        # Check if this was invoked from a guild
+        if not isinstance(ctx.channel, discord.DMChannel):
+            db = mysql()
+            query = """
+                SELECT
+                    user_id,
+                    home_guild
+                FROM user_preferences
+                WHERE user_id = %s;
+            """
+            results = db.query(query, [ctx.author.id])
+            db.close()
+
+            # If nothing was returned, then invoke the sethome command
+            if not results:
+                await ctx.invoke(self.client.get_command("sethome"))
+
         # Just a couple of sanity checks, since I know someone will test this at some point
         if count == 0:
             await ctx.send(embed = lib.embedder.make_embed(
