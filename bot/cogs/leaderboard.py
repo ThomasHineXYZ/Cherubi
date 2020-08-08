@@ -29,7 +29,7 @@ class Leaderboard(commands.Cog):
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     async def shiny_subcommand_group(self, ctx):
-        # If a subcommand is given, just skip anything else form this command
+        # If a subcommand is given, just skip anything else from this command
         if ctx.invoked_subcommand is not None:
             return
 
@@ -38,24 +38,29 @@ class Leaderboard(commands.Cog):
         db = mysql()
         query = """
             SELECT
-                user_id,
-                SUM(count) AS total
-            FROM user_shinies
+                us.user_id,
+                home_guild,
+                SUM(us.count) AS total
+            FROM user_shinies us
+            JOIN user_preferences up ON up.user_id = us.user_id
+            WHERE home_guild = %s
             GROUP BY user_id
-            ORDER BY total DESC
-            LIMIT 25;
+            ORDER BY total DESC;
         """
-        results = db.query(query)
+        results = db.query(query, [ctx.guild.id])
         db.close()
 
         columns = {"left": "", "right": ""}
-        for result in results:
+        for result in results[:10]:
             columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
             columns['right'] += f"{result['total']}\n"
+
+        rank = self.find_user_place(ctx.author.id, results)
 
         fields = [
             ("Name", columns['left'], True),
             ("Count", columns['right'], True),
+            ("Your Rank:", rank, False),
         ]
 
         await ctx.send(embed = lib.embedder.make_embed(
@@ -66,12 +71,12 @@ class Leaderboard(commands.Cog):
 
     @shiny_subcommand_group.group(
         name = "global",
-        aliases = ["-global", "--global", "g"],
+        aliases = ["-global", "--global", "-g", "g"],
         brief = "Brief text",
         description = "Cherubi Bot - Shiny Leaderboard (Global)",
         help = "Gets the results for the shiny leader"
     )
-    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.cooldown(1, 60, commands.BucketType.guild)
     async def shiny_subcommand_global(self, ctx):
         # WIP need to add in an option for global and guild specific. Right now
         # it is just global
@@ -87,19 +92,17 @@ class Leaderboard(commands.Cog):
         results = db.query(query)
         db.close()
 
-        print(results)
-        print(results.values().index(138097615479898112))
-        # print(list(results.keys())[list(results.values()).index(138097615479898112)])
-
         columns = {"left": "", "right": ""}
-        for result in results:
+        for result in results[:10]:
             columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
             columns['right'] += f"{result['total']}\n"
+
+        rank = self.find_user_place(ctx.author.id, results)
 
         fields = [
             ("Name", columns['left'], True),
             ("Count", columns['right'], True),
-            ("Your placing:", "Top 25", False),
+            ("Your Rank:", rank, False),
         ]
 
         await ctx.send(embed = lib.embedder.make_embed(
@@ -107,6 +110,9 @@ class Leaderboard(commands.Cog):
             title = "Global Shiny Leaderboard",
             fields = fields,
         ))
+
+    def find_user_place(self, user_id, results):
+        return next((i for i, item in enumerate(results) if item["user_id"] == user_id), None) + 1
 
 def setup(client):
     client.add_cog(Leaderboard(client))
