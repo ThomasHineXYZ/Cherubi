@@ -60,7 +60,9 @@ class Leaderboard(commands.Cog):
         fields = [
             ("Name", columns['left'], True),
             ("Count", columns['right'], True),
-            ("Your Rank:", rank, False),
+            lib.embedder.separator,
+            ("Your Rank:", rank, True),
+            ("Your Count", results[rank-1]['total'], True),
         ]
 
         await ctx.send(embed = lib.embedder.make_embed(
@@ -93,16 +95,18 @@ class Leaderboard(commands.Cog):
         db.close()
 
         columns = {"left": "", "right": ""}
-        for result in results[:10]:
+        for result in results[:25]:
             columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
             columns['right'] += f"{result['total']}\n"
 
         rank = self.find_user_place(ctx.author.id, results)
 
         fields = [
-            ("Name", columns['left'], True),
-            ("Count", columns['right'], True),
-            ("Your Rank:", rank, False),
+            ("Name:", columns['left'], True),
+            ("Count:", columns['right'], True),
+            lib.embedder.separator,
+            ("Your Rank:", rank, True),
+            ("Your Count", results[rank-1]['total'], True),
         ]
 
         await ctx.send(embed = lib.embedder.make_embed(

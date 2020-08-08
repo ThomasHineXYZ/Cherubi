@@ -61,6 +61,10 @@ colours = {
     "teal": discord.Colour.teal(),
 }
 
+# Blank line separation for embeds. This is to be added when you make the
+# dictionary of tuples for the fields
+separator = (u"\u200B", u"\u200B", False)
+
 def make_embed(
     colour = None,
     content = None,
