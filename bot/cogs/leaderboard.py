@@ -60,7 +60,14 @@ class Leaderboard(commands.Cog):
 
         columns = {"left": "", "right": ""}
         for result in results[:10]:
-            columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
+            # This is here in case someone on the leaderboard leaves the context
+            # guild, but it is still set to their main guild
+            if ctx.guild.get_member(result['user_id']):
+                user_name = ctx.guild.get_member(result['user_id']).display_name
+            else:
+                user_name = self.client.get_user(result['user_id'])
+
+            columns['left'] += f"{user_name}\n"
             columns['right'] += f"{result['total']}\n"
 
         rank = self.find_user_place(ctx.author.id, results)
@@ -112,7 +119,7 @@ class Leaderboard(commands.Cog):
 
         columns = {"left": "", "right": ""}
         for result in results[:25]:
-            columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
+            columns['left'] += f"{self.client.get_user(result['user_id'])}\n"
             columns['right'] += f"{result['total']}\n"
 
         rank = self.find_user_place(ctx.author.id, results)

@@ -24,7 +24,7 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "add",
         aliases = ["a"],
-        brief = "Adds a shiny Pokémon to your list.",
+        brief = "Adds a shiny Pokémon to your list",
         description = "Cherubi Bot - Shiny Checklist System (Add)",
         usage = "<name or dex #> [number]",
         help = "You can give either the name or the dex number of the Pokémon to add it to your list.\n\nYou also can give an amount, if you don't it'll add a single one."
@@ -112,7 +112,7 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "remove",
         aliases = ["delete", "r", "d"],
-        brief = "Removes a shiny Pokémon from your list.",
+        brief = "Removes a shiny Pokémon from your list",
         description = "Cherubi Bot - Shiny Checklist System (Remove)",
         usage = "<name or dex #> [number]",
         help = "You can give either the name or the dex number of the Pokémon to remove from your list.\n\nYou also can give an amount, if you don't it'll remove a single one."
@@ -209,7 +209,7 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "list",
         aliases = ["l"],
-        brief = "Lists the shiny Pokémon that you have.",
+        brief = "Lists the shiny Pokémon that you have",
         description = "Cherubi Bot - Shiny Checklist System (List)",
         help = "This lists off all of the shiny Pokémon in your collection."
     )
