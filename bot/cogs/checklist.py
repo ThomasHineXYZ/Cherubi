@@ -24,10 +24,10 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "add",
         aliases = ["a"],
-        brief = "Adds a shiny Pokemon to your list.",
+        brief = "Adds a shiny Pokémon to your list.",
         description = "Cherubi Bot - Shiny Checklist System (Add)",
         usage = "<name or dex #> [number]",
-        help = "You can give either the name or the dex number of the Pokemon to add it to your list.\n\nYou also can give an amount, if you don't it'll add a single one."
+        help = "You can give either the name or the dex number of the Pokémon to add it to your list.\n\nYou also can give an amount, if you don't it'll add a single one."
     )
     async def add_subcommand(self, ctx, pokemon, count = 1):
         # Check that the user has their home guild set. If not, then set it.
@@ -60,7 +60,7 @@ class Checklist(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = "Shiny Checklist",
-                content = "There is no such thing as negative Pokemon. At least... not yet.",
+                content = "There is no such thing as negative Pokémon. At least... not yet.",
             ))
             return
 
@@ -75,14 +75,14 @@ class Checklist(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "warning",
                 title = "Shiny Checklist",
-                content = f"Pokemon `{pokemon}` doesn't exist",
+                content = f"Pokémon `{pokemon}` doesn't exist",
             ))
             return
         elif len(pokemon_data) > 1: # WIP Not implemented right now
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "warning",
                 title = "Shiny Checklist",
-                content = "Pokemon with multiple forms, costumes, or variants aren't supported right now.",
+                content = "Pokémon with multiple forms, costumes, or variants aren't supported right now.",
             ))
             return
         else:
@@ -112,10 +112,10 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "remove",
         aliases = ["delete", "r", "d"],
-        brief = "Removes a shiny Pokemon from your list.",
+        brief = "Removes a shiny Pokémon from your list.",
         description = "Cherubi Bot - Shiny Checklist System (Remove)",
         usage = "<name or dex #> [number]",
-        help = "You can give either the name or the dex number of the Pokemon to remove from your list.\n\nYou also can give an amount, if you don't it'll remove a single one."
+        help = "You can give either the name or the dex number of the Pokémon to remove from your list.\n\nYou also can give an amount, if you don't it'll remove a single one."
     )
     async def remove_subcommand(self, ctx, pokemon, count = 1):
         # Just a couple of sanity checks, since I know someone will test this at some point
@@ -134,14 +134,14 @@ class Checklist(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "warning",
                 title = "Shiny Checklist",
-                content = f"Pokemon `{pokemon}` doesn't exist",
+                content = f"Pokémon `{pokemon}` doesn't exist",
             ))
             return
         elif len(pokemon_data) > 1: # WIP Not implemented right now
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "warning",
                 title = "Shiny Checklist",
-                content = "Pokemon with multiple forms, costumes, or variants aren't supported right now.",
+                content = "Pokémon with multiple forms, costumes, or variants aren't supported right now.",
             ))
             return
         else:
@@ -209,9 +209,9 @@ class Checklist(commands.Cog):
     @shiny_group.command(
         name = "list",
         aliases = ["l"],
-        brief = "Lists the shiny Pokemon that you have.",
+        brief = "Lists the shiny Pokémon that you have.",
         description = "Cherubi Bot - Shiny Checklist System (List)",
-        help = "This lists off all of the shiny Pokemon in your collection."
+        help = "This lists off all of the shiny Pokémon in your collection."
     )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def list_subcommand(self, ctx, target: Optional[discord.Member]):
@@ -241,7 +241,7 @@ class Checklist(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = "Shiny Checklist",
-                content = f"Unfortunately {target.display_name} doesn't have any Pokemon in your shiny list...",
+                content = f"Unfortunately {target.display_name} doesn't have any Pokémon in your shiny list...",
             ))
 
         else:

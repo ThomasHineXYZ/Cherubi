@@ -10,7 +10,7 @@ class Settings(commands.Cog):
 
     @commands.command(
         name = "sethome",
-        aliases = ["setguild"],
+        aliases = ["setguild", "setserver"],
         brief = "Set your home server",
         description = "Settings - Set Home Server",
         help = "Run this command to change your home server to the one you are currently in"
