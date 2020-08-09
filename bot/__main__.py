@@ -148,7 +148,9 @@ async def on_connect():
 async def on_disconnect():
     print("Bot Disconnected")
 
-@client.command()
+@client.command(
+    brief = "PONG!"
+)
 @commands.cooldown(1, 10, commands.BucketType.guild)
 async def ping(ctx):
     await ctx.send(f"Pong! {round(client.latency * 1000)}ms")

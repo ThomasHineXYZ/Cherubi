@@ -9,7 +9,10 @@ class ShinyEmbed(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command()
+    @commands.command(
+        brief = "Shows you a picture of the shiny Pokémon you give",
+        usage = "<pokemon>"
+    )
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def shinyembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
@@ -28,7 +31,10 @@ class ShinyEmbed(commands.Cog):
             embed = self.generate_embed(ctx, sprite, image, results[0])
             await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(
+        brief = "Shows you a picture of the Pokémon you give",
+        usage = "<pokemon>"
+    )
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def normalembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
