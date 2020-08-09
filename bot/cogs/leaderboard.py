@@ -24,7 +24,7 @@ class Leaderboard(commands.Cog):
         name = "shiny",
         brief = "Shiny leader boards for your server",
         description = "Cherubi Bot - Shiny Checklist System (List)",
-        help = "This lists off all of the shiny Pokemon in your collection."
+        help = "This runs the shiny Pokémon leaderboards for your server."
     )
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.guild)
@@ -50,6 +50,14 @@ class Leaderboard(commands.Cog):
         results = db.query(query, [ctx.guild.id])
         db.close()
 
+        if not results:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "warning",
+                title = f"{ctx.guild.name} Shiny Leaderboard",
+                content = f"Sadly `{ctx.guild.name}` doesn't have any users set as their main server.",
+            ))
+            return
+
         columns = {"left": "", "right": ""}
         for result in results[:10]:
             columns['left'] += f"{self.client.get_user(result['user_id']).display_name}\n"
@@ -74,7 +82,7 @@ class Leaderboard(commands.Cog):
     @shiny_subcommand_group.group(
         name = "global",
         aliases = ["-global", "--global", "-g", "g"],
-        brief = "Brief text",
+        brief = "Runs the global shiny leaderboards.",
         description = "Cherubi Bot - Shiny Leaderboard (Global)",
         help = "Gets the results for the shiny leader"
     )
@@ -93,6 +101,14 @@ class Leaderboard(commands.Cog):
         """
         results = db.query(query)
         db.close()
+
+        if not results:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = "Global Shiny Leaderboard",
+                content = "Apparently no one has any shiny Pokémon in their checklist?",
+            ))
+            return
 
         columns = {"left": "", "right": ""}
         for result in results[:25]:
