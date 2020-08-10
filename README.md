@@ -33,6 +33,17 @@ For DMing the bot though, any of `!`, `.`, `?`, `$`, `%`, `:`, `;`, `>` will wor
 Arguments within \< \> are required.<br/>
 Arguments within \[ \] are optional.
 
+### Friend Code Commands
+| Commands          | Requirements    | Description                                                                                       |
+| --------          | :-------------: | ------------                                                                                      |
+| !fc               | -               | Sends embed messages for each of the friend codes on your list                                    |
+| !fc [tagged user] | -               | If you tag a user it'll do the same but with their codes                                          |
+| !fc [filter]      | -               | If you add in a filter text. Can be combined with a tagged user if desired                        |
+| !fc add           | -               | Adds / edits a friend code on your list                                                           |
+| !fc list          | -               | This lists all of your friend codes in a single message. This command is **not** mobile friendly. |
+| !fc listall       | _Server Owner_  | Lists all friend codes for everyone on your server. This command is **not** mobile friendly       |
+| !fc remove        | -               | Removes a friend code from your list.                                                             |
+
 ### Leaderboard Commands
 | Commands                             | Requirements    | Description                                                   |
 | --------                             | :-------------: | ------------                                                  |
