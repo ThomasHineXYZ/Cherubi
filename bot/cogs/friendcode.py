@@ -19,16 +19,12 @@ class FriendCode(commands.Cog):
         aliases = ["fc"],
         brief = "Friend Code Sharing System",
         description = "Cherubi Bot - Friend Code Sharing System",
-        usage = "[tagged user] | <add>",
-        help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below."
+        usage = "[tagged user] [filter] | <add | list | remove>",
+        help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below.",
+        invoke_without_command=True
     )
     @commands.cooldown(2, 5, commands.BucketType.user)
     async def friendcode_group(self, ctx, target: Optional[discord.Member], filter = None):
-        print(filter)
-        # If a subcommand is given, just skip anything else from this command
-        if ctx.invoked_subcommand is not None:
-            return
-
         # If no target is given, use the user who wrote the command
         target = target or ctx.author
 
@@ -228,6 +224,8 @@ class FriendCode(commands.Cog):
         """
         results = db.query(query, [ctx.author.id, input_identifier])
         db.close()
+
+        print(db.rowcount)
 
         await ctx.send(embed = lib.embedder.make_embed(
             type = "info",
