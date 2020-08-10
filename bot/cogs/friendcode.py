@@ -85,7 +85,7 @@ class FriendCode(commands.Cog):
     @friendcode_group.command(
         name = "add",
         aliases = ["a"],
-        brief = "Friend Code Sharing System",
+        brief = "Adds / edits a friend code on your list",
         description = "Cherubi Bot - Friend Code Sharing System",
         usage = "<username> <friend code>",
         help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
@@ -139,31 +139,83 @@ class FriendCode(commands.Cog):
     @friendcode_group.command(
         name = "list",
         aliases = ["l"],
-        brief = "Friend Code Sharing System",
+        brief = "Lists all of your friend codes in a single message",
         description = "Cherubi Bot - Friend Code Sharing System",
-        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+        help = "This lists all of your friend codes in a single message. This command is not mobile friendly."
     )
     async def list_subcommand(self, ctx):
-        await ctx.send('List All Owner Only Test!')
+        db = mysql()
+        query = """
+            SELECT
+                fc.identifier AS identifier,
+                fc.code AS code
+            FROM friend_codes fc
+            WHERE fc.user_id = %s
+            ORDER BY fc.identifier ASC;
+        """
+        results = db.query(query, [ctx.author.id])
+        db.close()
+
+        # For every result returned, send an embed with the friend code and
+        fields = []
+        for result in results:
+            fields.append((result['identifier'], result['code'], True))
+
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "info",
+            title = f"F.C. List for {ctx.author.display_name}",
+            fields = fields
+        ))
 
     @friendcode_group.command(
         name = "listall",
         aliases = ["list_all"],
-        brief = "Friend Code Sharing System",
+        brief = "Lists all the server's friend codes",
         description = "Cherubi Bot - Friend Code Sharing System",
-        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+        help = "Lists all friend codes for everyone on your server. This command is not mobile friendly"
     )
     @commands.check_any(commands.is_owner(), is_guild_owner())
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def listall_subcommand(self, ctx):
-        await ctx.send('List All Owner Only Test!')
+        # This MySQL statement is janky, but it works. Plus it is just an admin command, so it doesn't really matter
+        db = mysql()
+        query = """
+            SELECT
+                fc.user_id AS user_id,
+                GROUP_CONCAT(CONCAT(fc.identifier, ': ', LPAD(fc.code, 12, '0')) SEPARATOR '\n') AS information
+            FROM friend_codes fc
+            LEFT JOIN user_preferences up ON up.user_id = fc.user_id
+            WHERE up.home_guild = %s
+            GROUP BY fc.user_id
+            ORDER BY fc.identifier ASC;
+        """
+        results = db.query(query, [ctx.guild.id])
+        db.close()
+
+        # For every result returned, send an embed with the friend code and
+        fields = []
+        for result in results:
+            # This is here in case someone leaves the guild, but it is still
+            # set to their home guild
+            if ctx.guild.get_member(result['user_id']):
+                user_name = ctx.guild.get_member(result['user_id']).display_name
+            else:
+                user_name = self.client.get_user(result['user_id'])
+
+            fields.append((user_name, result['information'], True))
+
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "info",
+            title = f"F.C. List for {ctx.guild.name}",
+            fields = fields
+        ))
 
     @friendcode_group.command(
         name = "remove",
         aliases = ["r"],
-        brief = "Friend Code Sharing System",
+        brief = "Removes a friend code from your list.",
         description = "Cherubi Bot - Friend Code Sharing System",
-        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+        help = ""
     )
     async def remove_subcommand(self, ctx):
         await ctx.send('List All Owner Only Test!')
