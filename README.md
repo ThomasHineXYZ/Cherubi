@@ -43,16 +43,16 @@ Arguments within \[ \] are optional.
 ### Shiny Checklist Commands
 | Commands                             | Requirements    | Description                                                       |
 | --------                             | :-------------: | ------------                                                      |
-| **!shiny add** <pokemon>             | -               | Adds one of the given Pokémon to your checklist                   |
-| **!shiny add** <pokemon> [number]    | -               | If a number is given, it'll add that many of the given Pokémon    |
+| **!shiny add** \<pokemon\>             | -               | Adds one of the given Pokémon to your checklist                   |
+| **!shiny add** \<pokemon\> [number]    | -               | If a number is given, it'll add that many of the given Pokémon    |
 | **!shiny list**                      | -               | Prints out your shiny list                                        |
-| **!shiny remove** <pokemon>          | -               | Removes one of the given Pokémon from your checklist              |
-| **!shiny remove** <pokemon> [number] | -               | If a number is given, it'll remove that many of the given Pokémon |
+| **!shiny remove** \<pokemon\>          | -               | Removes one of the given Pokémon from your checklist              |
+| **!shiny remove** \<pokemon\> [number] | -               | If a number is given, it'll remove that many of the given Pokémon |
 
 ### Owner
 | Commands                      | Requirements    | Description                                          |
 | --------                      | :-------------: | ------------                                         |
-| **!changeprefix** <character> | _Server Owner_  | Changes the command prefix to a new single character |
+| **!changeprefix** \<character\> | _Server Owner_  | Changes the command prefix to a new single character |
 | **!serverinfo**               | _Server Owner_  | Gives an readout for some stats on the server        |
 | **!userinfo**                 | _Server Owner_  | Gives some stats for a tagged user                   |
 
@@ -66,8 +66,8 @@ Arguments within \[ \] are optional.
 These are commands that are currently implemented, but might change or be removed
 | Commands               | Requirements    | Description                          |
 | --------               | :-------------: | ------------                         |
-| !normalembed <pokemon> | -               | Shows you info about a Pokémon       |
-| !shinyembed <pokemon>  | -               | Shows you info about a shiny Pokémon |
+| !normalembed \<pokemon\> | -               | Shows you info about a Pokémon       |
+| !shinyembed \<pokemon\>  | -               | Shows you info about a shiny Pokémon |
 
 
 ## Credits
