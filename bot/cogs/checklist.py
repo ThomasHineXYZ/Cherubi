@@ -45,7 +45,7 @@ class Checklist(commands.Cog):
             db.close()
 
             # If nothing was returned, then invoke the sethome command
-            if not results:
+            if not results or not results[0]['home_guild']:
                 await ctx.invoke(self.client.get_command("sethome"))
 
         # Just a couple of sanity checks, since I know someone will test this at some point
