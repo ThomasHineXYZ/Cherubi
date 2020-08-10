@@ -19,10 +19,10 @@ class FriendCode(commands.Cog):
         aliases = ["fc"],
         brief = "Friend Code Sharing System",
         description = "Cherubi Bot - Friend Code Sharing System",
-        usage = "[tagged user] | <command>",
+        usage = "[tagged user] | <add>",
         help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below."
     )
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def friendcode_group(self, ctx, target: Optional[discord.Member]):
         # If a subcommand is given, just skip anything else from this command
         if ctx.invoked_subcommand is not None:
@@ -52,7 +52,7 @@ class FriendCode(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "warning",
                 title = f"{target.display_name}'s Friend Codes",
-                content = f"Sadly `{target.display_name}` doesn't have any friend codes stored.",
+                content = f"Sadly `{target.display_name}` doesn't have any friend codes stored."
             ))
             return
 
@@ -82,15 +82,92 @@ class FriendCode(commands.Cog):
                 footer = f"Owned by {target.display_name}"
             ))
 
-    @friendcode_group.command()
-    @commands.check_any(commands.is_owner(), is_guild_owner())
-    async def example(self, ctx):
-        await ctx.send('Hoorah!')
+    @friendcode_group.command(
+        name = "add",
+        aliases = ["a"],
+        brief = "Friend Code Sharing System",
+        description = "Cherubi Bot - Friend Code Sharing System",
+        usage = "<username> <friend code>",
+        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+    )
+    async def add_subcommand(self, ctx, input_identifier, input_code, input_code_part2 = None, input_code_part3 = None):
+        # This and the additional two "input_code" parts are for if the user
+        # uses a separated version of the friend code.
+        if input_code_part2 is not None:
+            input_code = input_code + input_code_part2 + input_code_part3
 
-    @friendcode_group.command()
+        # Checks if the identifier if over 16 characters long. If so then send
+        # an error embed and return.
+        if len(input_identifier) > 16:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"Error Adding Friend Code",
+                content = "The username / identifier that you gave is longer than the maximum character limit."
+            ))
+            return
+
+        # Check that the friend code was numbers and that it was 12 digits long,
+        # if it isn't then send an error embed and return
+        if not input_code.isdigit() or len(input_code) != 12:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"Error Adding Friend Code",
+                content = "The given friend code isn't 12 numbers long or is not just numbers."
+            ))
+            await ctx.send_help(str(ctx.command))
+            return
+
+        db = mysql()
+        query = """
+            INSERT INTO friend_codes (user_id, identifier, code)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE code = VALUES(code);
+        """
+        db.execute(query, [
+            ctx.message.author.id,
+            input_identifier,
+            input_code
+        ])
+        db.close()
+
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "info",
+            title = f"Added Friend Code",
+            content = f"Added friend code `{input_code}` for `{input_identifier}`"
+        ))
+
+    @friendcode_group.command(
+        name = "list",
+        aliases = ["l"],
+        brief = "Friend Code Sharing System",
+        description = "Cherubi Bot - Friend Code Sharing System",
+        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+    )
+    async def list_subcommand(self, ctx):
+        await ctx.send('List All Owner Only Test!')
+
+    @friendcode_group.command(
+        name = "listall",
+        aliases = ["list_all"],
+        brief = "Friend Code Sharing System",
+        description = "Cherubi Bot - Friend Code Sharing System",
+        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+    )
     @commands.check_any(commands.is_owner(), is_guild_owner())
-    async def listall(self, ctx):
-        await ctx.send('List Test!')
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def listall_subcommand(self, ctx):
+        await ctx.send('List All Owner Only Test!')
+
+    @friendcode_group.command(
+        name = "remove",
+        aliases = ["r"],
+        brief = "Friend Code Sharing System",
+        description = "Cherubi Bot - Friend Code Sharing System",
+        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+    )
+    async def remove_subcommand(self, ctx):
+        await ctx.send('List All Owner Only Test!')
+
 
 def setup(client):
     client.add_cog(FriendCode(client))
