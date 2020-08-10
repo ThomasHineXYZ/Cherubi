@@ -12,6 +12,15 @@ CREATE TABLE `checks` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='A table to store checks persistently';
 
+CREATE TABLE `friend_codes` (
+  `user_id` bigint(20) unsigned NOT NULL,
+  `identifier` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` bigint(12) unsigned NOT NULL,
+  PRIMARY KEY (`user_id`,`identifier`),
+  UNIQUE KEY `user_id_identifier` (`user_id`,`identifier`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `guild_preferences` (
   `guild` bigint(20) NOT NULL COMMENT 'Discord Guild ID',
   `command_prefix` char(1) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The character that is the prefix of commands',
@@ -33,16 +42,16 @@ CREATE TABLE `pokemon` (
 
 CREATE TABLE `pokemon_names` (
   `dex` int(4) unsigned NOT NULL COMMENT 'The Pokemons ID in the national dex',
-  `chinese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Chinese',
-  `english` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in English',
-  `french` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in French',
-  `german` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in German',
-  `italian` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Italian',
-  `japanese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Japanese',
-  `korean` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Korean',
-  `portuguese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Portuguese',
-  `spanish` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Spanish',
-  `thai` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemon''s name in Thai',
+  `chinese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Chinese',
+  `english` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in English',
+  `french` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in French',
+  `german` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in German',
+  `italian` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Italian',
+  `japanese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Japanese',
+  `korean` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Korean',
+  `portuguese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Portuguese',
+  `spanish` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Spanish',
+  `thai` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Thai',
   PRIMARY KEY (`dex`),
   UNIQUE KEY `dex` (`dex`),
   KEY `dex_index` (`dex`)
@@ -50,7 +59,8 @@ CREATE TABLE `pokemon_names` (
 
 CREATE TABLE `user_preferences` (
   `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
-  `home_guild` bigint(20) unsigned NOT NULL COMMENT 'The users home guild ID',
+  `home_guild` bigint(20) unsigned NULL COMMENT 'The users home guild / sever ID',
+  `fc_visibility` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'private',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `user_id_index` (`user_id`)
