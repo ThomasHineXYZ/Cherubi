@@ -34,51 +34,51 @@ Arguments within \< \> are required.<br/>
 Arguments within \[ \] are optional.
 
 ### Friend Code Commands
-| Commands          | Requirements    | Description                                                                                       |
-| --------          | :-------------: | ------------                                                                                      |
-| !fc               | -               | Sends embed messages for each of the friend codes on your list                                    |
-| !fc [tagged user] | -               | If you tag a user it'll do the same but with their codes                                          |
-| !fc [filter]      | -               | If you add in a filter text. Can be combined with a tagged user if desired                        |
-| !fc add           | -               | Adds / edits a friend code on your list                                                           |
-| !fc list          | -               | This lists all of your friend codes in a single message. This command is **not** mobile friendly. |
-| !fc listall       | _Server Owner_  | Lists all friend codes for everyone on your server. This command is **not** mobile friendly       |
-| !fc remove        | -               | Removes a friend code from your list.                                                             |
+| Command                                  | Requirements    | Description                                                                       |
+| --------                                 | :-------------: | ------------                                                                      |
+| **!fc**                                  | -               | Sends embed messages for each of the friend codes on your list.                   |
+| **!fc** \[tagged user\]                  | -               | If you tag a user it'll do the same but with their codes.                         |
+| **!fc** \[filter\]                       | -               | If you add in a filter text. Can be combined with a tagged user if desired.       |
+| **!fc add** \<username\> \<friend code\> | -               | Adds / edits a friend code on your list.                                          |
+| **!fc list**                             | -               | This lists all of your friend codes in a single message. **Not mobile friendly.** |
+| **!fc listall**                          | _Server Owner_  | Lists all friend codes for everyone on your server. **Not mobile friendly.**      |
+| **!fc remove** \<username\>              | -               | Removes a friend code from your list.                                             |
 
 ### Leaderboard Commands
-| Commands                             | Requirements    | Description                                                   |
-| --------                             | :-------------: | ------------                                                  |
-| **!sethome**                         | -               | Sets your home server.                                        |
-| **!leaderboard shiny**               | -               | Brings up the leaderboard for your server.                    |
-| **!leaderboard shiny** \[\-\-global] | -               | If `--global` is given, it'll bring up the global leaderboard |
+| Command                              | Requirements    | Description                                                                             |
+| --------                             | :-------------: | ------------                                                                            |
+| **!sethome**                         | -               | Sets your home server.                                                                  |
+| **!leaderboard shiny**               | -               | Brings up the leaderboard for your server. **Not mobile friendly.**                     |
+| **!leaderboard shiny** \[\-\-global] | -               | If `--global` is given, it'll bring up the global leaderboard. **Not mobile friendly.** |
 
 ### Shiny Checklist Commands
-| Commands                             | Requirements    | Description                                                       |
-| --------                             | :-------------: | ------------                                                      |
-| **!shiny add** \<pokemon\>             | -               | Adds one of the given Pokémon to your checklist                   |
-| **!shiny add** \<pokemon\> [number]    | -               | If a number is given, it'll add that many of the given Pokémon    |
-| **!shiny list**                      | -               | Prints out your shiny list                                        |
-| **!shiny remove** \<pokemon\>          | -               | Removes one of the given Pokémon from your checklist              |
-| **!shiny remove** \<pokemon\> [number] | -               | If a number is given, it'll remove that many of the given Pokémon |
+| Command                                  | Requirements    | Description                                                        |
+| --------                                 | :-------------: | ------------                                                       |
+| **!shiny add** \<pokemon\>               | -               | Adds one of the given Pokémon to your checklist.                   |
+| **!shiny add** \<pokemon\> \[number\]    | -               | If a number is given, it'll add that many of the given Pokémon.    |
+| **!shiny list**                          | -               | Prints out your shiny list.                                        |
+| **!shiny remove** \<pokemon\>            | -               | Removes one of the given Pokémon from your checklist.              |
+| **!shiny remove** \<pokemon\> \[number\] | -               | If a number is given, it'll remove that many of the given Pokémon. |
 
 ### Owner
-| Commands                      | Requirements    | Description                                          |
-| --------                      | :-------------: | ------------                                         |
-| **!changeprefix** \<character\> | _Server Owner_  | Changes the command prefix to a new single character |
-| **!serverinfo**               | _Server Owner_  | Gives an readout for some stats on the server        |
-| **!userinfo**                 | _Server Owner_  | Gives some stats for a tagged user                   |
+| Command                         | Requirements    | Description                                           |
+| --------                        | :-------------: | ------------                                          |
+| **!changeprefix** \<character\> | _Server Owner_  | Changes the command prefix to a new single character. |
+| **!serverinfo**                 | _Server Owner_  | Gives an readout for some stats on the server.        |
+| **!userinfo**                   | _Server Owner_  | Gives some stats for a tagged user.                   |
 
 ### Miscellaneous Commands
-| Commands              | Requirements    | Description                                |
+| Command               | Requirements    | Description                                |
 | --------              | :-------------: | ------------                               |
 | **!help** \[command\] | -               | Shows bot/command help, with descriptions. |
 | **!ping**             | -               | Runs a heartbeat check on the bot. PONG!   |
 
 ### Temporary / Test Commands
 These are commands that are currently implemented, but might change or be removed
-| Commands               | Requirements    | Description                          |
-| --------               | :-------------: | ------------                         |
-| !normalembed \<pokemon\> | -               | Shows you info about a Pokémon       |
-| !shinyembed \<pokemon\>  | -               | Shows you info about a shiny Pokémon |
+| Command                      | Requirements    | Description                           |
+| --------                     | :-------------: | ------------                          |
+| **!normalembed** \<pokemon\> | -               | Shows you info about a Pokémon.       |
+| **!shinyembed** \<pokemon\>  | -               | Shows you info about a shiny Pokémon. |
 
 
 ## Credits
