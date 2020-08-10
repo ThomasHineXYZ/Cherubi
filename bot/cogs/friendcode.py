@@ -23,7 +23,8 @@ class FriendCode(commands.Cog):
         help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below."
     )
     @commands.cooldown(2, 5, commands.BucketType.user)
-    async def friendcode_group(self, ctx, target: Optional[discord.Member]):
+    async def friendcode_group(self, ctx, target: Optional[discord.Member], filter = None):
+        print(filter)
         # If a subcommand is given, just skip anything else from this command
         if ctx.invoked_subcommand is not None:
             return
@@ -41,9 +42,10 @@ class FriendCode(commands.Cog):
             FROM friend_codes fc
             LEFT JOIN user_preferences up ON up.user_id = fc.user_id
             WHERE fc.user_id = %s
+            AND fc.identifier LIKE %s
             ORDER BY fc.identifier ASC;
         """
-        results = db.query(query, [target.id])
+        results = db.query(query, [target.id, f"%{filter if filter else ''}%"])
         db.close()
 
         # Check if the target has any friend codes on file. If not, send a
@@ -67,7 +69,7 @@ class FriendCode(commands.Cog):
                 type = "error",
                 title = f"{target.display_name}'s Friend Codes",
                 content = f"This is not `{target.display_name}`'s home server and their visibility isn't set to public.",
-                footer = f"!sethome or !friendcode visibility public"
+                footer = f"They need to run !sethome or !friendcode visibility public"
             ))
             return
 
@@ -217,8 +219,20 @@ class FriendCode(commands.Cog):
         description = "Cherubi Bot - Friend Code Sharing System",
         help = ""
     )
-    async def remove_subcommand(self, ctx):
-        await ctx.send('List All Owner Only Test!')
+    async def remove_subcommand(self, ctx, input_identifier):
+        db = mysql()
+        query = """
+            DELETE FROM friend_codes
+            WHERE user_id = %s
+            AND identifier = %s;
+        """
+        results = db.query(query, [ctx.author.id, input_identifier])
+        db.close()
+
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "info",
+            title = f"Removed {input_identifier} from your list"
+        ))
 
 
 def setup(client):
