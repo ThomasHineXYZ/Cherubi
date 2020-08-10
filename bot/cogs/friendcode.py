@@ -23,7 +23,6 @@ class FriendCode(commands.Cog):
         help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below.",
         invoke_without_command=True
     )
-    @commands.cooldown(2, 5, commands.BucketType.user)
     async def friendcode_group(self, ctx, target: Optional[discord.Member], filter = None):
         # If no target is given, use the user who wrote the command
         target = target or ctx.author
@@ -47,12 +46,20 @@ class FriendCode(commands.Cog):
         # Check if the target has any friend codes on file. If not, send a
         # warning embed and return.
         if not results:
-            await ctx.send(embed = lib.embedder.make_embed(
-                type = "warning",
-                title = f"{target.display_name}'s Friend Codes",
-                content = f"Sadly `{target.display_name}` doesn't have any friend codes stored."
-            ))
-            return
+            if filter:
+                await ctx.send(embed = lib.embedder.make_embed(
+                    type = "warning",
+                    title = f"{target.display_name}'s Friend Codes",
+                    content = f"No friend codes found with that filter."
+                ))
+                return
+            else:
+                await ctx.send(embed = lib.embedder.make_embed(
+                    type = "warning",
+                    title = f"{target.display_name}'s Friend Codes",
+                    content = f"Sadly `{target.display_name}` doesn't have any friend codes stored."
+                ))
+                return
 
         # Check if the target is the original author,
         # if not then check if their visibility isn't public,
@@ -88,11 +95,11 @@ class FriendCode(commands.Cog):
         usage = "<username> <friend code>",
         help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
     )
-    async def add_subcommand(self, ctx, input_identifier, input_code, input_code_part2 = None, input_code_part3 = None):
-        # This and the additional two "input_code" parts are for if the user
+    async def add_subcommand(self, ctx, input_identifier, code, code_part2 = None, code_part3 = None):
+        # This and the additional two code "parts" are for if the user
         # uses a separated version of the friend code.
-        if input_code_part2 is not None:
-            input_code = input_code + input_code_part2 + input_code_part3
+        if code_part2 is not None:
+            code = code + code_part2 + code_part3
 
         # Checks if the identifier if over 16 characters long. If so then send
         # an error embed and return.
@@ -106,11 +113,20 @@ class FriendCode(commands.Cog):
 
         # Check that the friend code was numbers and that it was 12 digits long,
         # if it isn't then send an error embed and return
-        if not input_code.isdigit() or len(input_code) != 12:
+        if not code.isdigit() or len(code) != 12:
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = f"Error Adding Friend Code",
-                content = "The given friend code isn't 12 numbers long or is not just numbers."
+                content = "The given friend code isn't all numbers."
+            ))
+            await ctx.send_help(str(ctx.command))
+            return
+
+        if len(code) != 12:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"Error Adding Friend Code",
+                content = "The given friend code isn't 12 digits long"
             ))
             await ctx.send_help(str(ctx.command))
             return
@@ -124,14 +140,14 @@ class FriendCode(commands.Cog):
         db.execute(query, [
             ctx.message.author.id,
             input_identifier,
-            input_code
+            code
         ])
         db.close()
 
         await ctx.send(embed = lib.embedder.make_embed(
-            type = "info",
+            type = "success",
             title = f"Added Friend Code",
-            content = f"Added friend code `{input_code}` for `{input_identifier}`"
+            content = f"Added friend code `{code}` for `{input_identifier}`"
         ))
 
     @friendcode_group.command(
@@ -213,24 +229,34 @@ class FriendCode(commands.Cog):
         aliases = ["r"],
         brief = "Removes a friend code from your list.",
         description = "Cherubi Bot - Friend Code Sharing System",
-        help = ""
+        usage = "<username>",
+        help = "Removes the given friend code from your list"
     )
-    async def remove_subcommand(self, ctx, input_identifier):
+    async def remove_subcommand(self, ctx, identifier):
         db = mysql()
         query = """
             DELETE FROM friend_codes
             WHERE user_id = %s
             AND identifier = %s;
         """
-        results = db.query(query, [ctx.author.id, input_identifier])
+        db.execute(query, [ctx.author.id, identifier])
+        count = db.cursor.rowcount
         db.close()
 
-        print(db.rowcount)
+        if count == 0:
+            pass
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"Error Removing Friend Code",
+                content = f"{identifier} not found on your list"
+            ))
 
-        await ctx.send(embed = lib.embedder.make_embed(
-            type = "info",
-            title = f"Removed {input_identifier} from your list"
-        ))
+        else:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "success",
+                title = f"Removed Friend Code",
+                content = f"Removed {identifier} from your list"
+            ))
 
 
 def setup(client):
