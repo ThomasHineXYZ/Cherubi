@@ -61,18 +61,36 @@ class FriendCode(commands.Cog):
                 ))
                 return
 
-        # Check if the target is the original author,
-        # if not then check if their visibility isn't public,
-        # if it is then check if this is their home guild.
-        # If it isn't, send an error embed and return.
-        if target.id != ctx.author.id\
-            and results[0]['visibility'] != "public"\
-            and results[0]['home_guild'] != ctx.guild.id:
+        # Check if the user's visibility is hidden. If so, give an error and return.
+        if target.id != ctx.author.id and results[0]['visibility'] == "hidden":
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = f"{target.display_name}'s Friend Codes",
-                content = f"This is not `{target.display_name}`'s home server and their visibility isn't set to public.",
-                footer = f"They need to run !sethome or !friendcode visibility public"
+                content = f"`{target.display_name}` has their friend code visibility set to hidden. Only they can send them."
+            ))
+            return
+
+        # Check if they have a home server set. If not, give an error and return.
+        if target.id != ctx.author.id and not results[0]['home_guild']:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"{target.display_name}'s Friend Codes",
+                content = f"`{target.display_name}` doesn't have a home server set.",
+                footer = f"They need to run !sethome"
+            ))
+            return
+
+        # Check if the target is the original author,
+        # if not then check if their visibility is private,
+        # if it is then check if this is their home guild.
+        # If it isn't, send an error embed and return.
+        if (target.id != ctx.author.id
+            and (not results[0]['visibility'] or results[0]['visibility'] == "private")
+            and results[0]['home_guild'] != ctx.guild.id):
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"{target.display_name}'s Friend Codes",
+                content = f"This is not `{target.display_name}`'s home server and their visibility is set to private."
             ))
             return
 
@@ -126,7 +144,7 @@ class FriendCode(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = f"Error Adding Friend Code",
-                content = "The given friend code isn't 12 digits long"
+                content = "The given friend code isn't 12 digits long."
             ))
             await ctx.send_help(str(ctx.command))
             return
@@ -147,7 +165,7 @@ class FriendCode(commands.Cog):
         await ctx.send(embed = lib.embedder.make_embed(
             type = "success",
             title = f"Added Friend Code",
-            content = f"Added friend code `{code}` for `{input_identifier}`"
+            content = f"Added friend code `{code}` for `{input_identifier}`."
         ))
 
     @friendcode_group.command(
@@ -248,15 +266,80 @@ class FriendCode(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = f"Error Removing Friend Code",
-                content = f"{identifier} not found on your list"
+                content = f"{identifier} not found on your list."
             ))
 
         else:
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "success",
                 title = f"Removed Friend Code",
-                content = f"Removed {identifier} from your list"
+                content = f"Removed {identifier} from your list."
             ))
+
+    @friendcode_group.command(
+        name = "visibility",
+        aliases = ["vis", "v"],
+        brief = "Changes your friend code visibility.",
+        description = "Cherubi Bot - Friend Code Sharing System",
+        usage = "<public | private | hidden>",
+        help = "This lets you change your visiblity to either public, private, or hidden depending what you want.\n\n\
+            Public: lets anyone on any server you're in tag you and see your friend codes.\n\n\
+            Private: lets only your home server see your friend codes.\n\n\
+            Hidden: lets no one tag you to see your friend codes. You have to invoke !friendcode yourself for them to show."
+    )
+    async def visibility_subcommand(self, ctx, visibility = None):
+        # If they don't give a visibility, tell them what their current setting is
+        if not visibility:
+            db = mysql()
+            query = """
+                SELECT fc_visibility
+                FROM user_preferences
+                WHERE user_id = %s;
+            """
+            results = db.query(query, [ctx.author.id])
+            db.close()
+
+            if not results:
+                visibility = "private"
+            else:
+                visibility = results[0]['fc_visibility']
+
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "info",
+                title = f"Your F.C. Visibility",
+                content = f"Your friend code visibility is currently set to {visibility.title()}"
+            ))
+            return
+
+        # Normalize it to all lowercase
+        visibility = visibility.lower()
+
+        # List of available visibility settings
+        visibility_settings = ["public", "private", "hidden"]
+
+        # Check if the given one is within the list. If not, spit out an error embed and return
+        if visibility not in visibility_settings:
+            await ctx.send(embed = lib.embedder.make_embed(
+                type = "error",
+                title = f"Error Changing F.C. Visibility",
+                content = f"{visibility.title()} is not a valid option."
+            ))
+            return
+
+        db = mysql()
+        query = """
+            INSERT INTO user_preferences (user_id, fc_visibility)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE fc_visibility = VALUES(fc_visibility);
+        """
+        db.execute(query, [ctx.author.id, visibility])
+        db.close()
+
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "success",
+            title = f"Changed F.C. Visibility",
+            content = f"Changed your friend code visibility to `{visibility.title()}`."
+        ))
 
 
 def setup(client):

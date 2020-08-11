@@ -35,8 +35,8 @@ Arguments within \[ \] are optional.
 
 ### Friend Code Commands
 `!friendcode` is aliased as `!fc`, so you can use them interchangeably.
-| Command                                  | Requirements    | Description                                                                       |
-| --------                                 | :-------------: | ------------                                                                      |
+| Command                                          | Requirements    | Description                                                                       |
+| --------                                         | :-------------: | ------------                                                                      |
 | **!friendcode**                                  | -               | Sends embed messages for each of the friend codes on your list.                   |
 | **!friendcode** \[tagged user\]                  | -               | If you tag a user it'll do the same but with their codes.                         |
 | **!friendcode** \[filter\]                       | -               | If you add in a filter text. Can be combined with a tagged user if desired.       |
@@ -44,6 +44,8 @@ Arguments within \[ \] are optional.
 | **!friendcode list**                             | -               | This lists all of your friend codes in a single message. **Not mobile friendly.** |
 | **!friendcode listall**                          | _Server Owner_  | Lists all friend codes for everyone on your server. **Not mobile friendly.**      |
 | **!friendcode remove** \<username\>              | -               | Removes a friend code from your list.                                             |
+| **!friendcode visibility**                       | -               | If run on its own, it'll tell you your current visibility setting.                |
+| **!friendcode visibility** \<setting\>           | -               | Sets your visibility as you wish. The options are public, private, and hidden.    |
 
 ### Leaderboard Commands
 | Command                              | Requirements    | Description                                                                             |
