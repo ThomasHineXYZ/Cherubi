@@ -50,7 +50,7 @@ class FriendCode(commands.Cog):
                 await ctx.send(embed = lib.embedder.make_embed(
                     type = "warning",
                     title = f"{target.display_name}'s Friend Codes",
-                    content = f"No friend codes found with that filter."
+                    content = f"No friend codes were found for `{target.display_name}` with `{filter}` in it"
                 ))
                 return
             else:
@@ -110,8 +110,8 @@ class FriendCode(commands.Cog):
         aliases = ["a"],
         brief = "Adds / edits a friend code on your list",
         description = "Cherubi Bot - Friend Code Sharing System",
-        usage = "<username> <friend code>",
-        help = "This adds the given friend code to your list. If you run this again with the same username, it'll change the friend code for it."
+        usage = "<trainer name> <friend code>",
+        help = "This adds the given friend code to your list. If you run this again with the same trainer name, it'll change the friend code for it."
     )
     async def add_subcommand(self, ctx, input_identifier, code, code_part2 = None, code_part3 = None):
         # This and the additional two code "parts" are for if the user
@@ -125,7 +125,7 @@ class FriendCode(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "error",
                 title = f"Error Adding Friend Code",
-                content = "The username / identifier that you gave is longer than the maximum character limit."
+                content = "The trainer name / identifier that you gave is longer than the maximum character limit."
             ))
             return
 
@@ -244,10 +244,10 @@ class FriendCode(commands.Cog):
 
     @friendcode_group.command(
         name = "remove",
-        aliases = ["r"],
+        aliases = ["r", "delete", "d"],
         brief = "Removes a friend code from your list.",
         description = "Cherubi Bot - Friend Code Sharing System",
-        usage = "<username>",
+        usage = "<trainer name>",
         help = "Removes the given friend code from your list"
     )
     async def remove_subcommand(self, ctx, identifier):

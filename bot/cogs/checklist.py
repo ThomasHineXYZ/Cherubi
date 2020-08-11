@@ -105,7 +105,7 @@ class Checklist(commands.Cog):
             await ctx.send(embed = lib.embedder.make_embed(
                 type = "success",
                 title = "Shiny Checklist",
-                content = f"Added {count} shiny {pokemon_data[0]['name']} to your list",
+                content = f"Added {'a' if count == 1 else count} shiny {pokemon_data[0]['name']} to your list",
                 thumbnail = self.generate_image_link(pokemon_data[0], shiny = True)
             ))
 
