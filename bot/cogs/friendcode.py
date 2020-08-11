@@ -21,7 +21,7 @@ class FriendCode(commands.Cog):
         description = "Cherubi Bot - Friend Code Sharing System",
         usage = "[tagged user] [filter] | <add | list | remove>",
         help = "You can run the command without a tagged user to bring up your info, tag a user to bring up theirs, or run one of the subcommands that are below.",
-        invoke_without_command=True
+        invoke_without_command = True
     )
     async def friendcode_group(self, ctx, target: Optional[discord.Member], filter = None):
         # If no target is given, use the user who wrote the command
