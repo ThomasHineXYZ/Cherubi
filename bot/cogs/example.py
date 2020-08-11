@@ -9,7 +9,7 @@ class Example(commands.Cog):
     def user_is_author(ctx):
         return ctx.message.author.id == int(os.environ['BOT_AUTHOR'])
 
-    @commands.command(pass_context = True)
+    @commands.command()
     @commands.check(user_is_author)
     async def example(self, ctx):
         await ctx.send('Hoorah!')

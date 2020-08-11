@@ -29,7 +29,7 @@ class Settings(commands.Cog):
         await ctx.send(embed = lib.embedder.make_embed(
             type = "info",
             title = "Home Server Set!",
-            content = f"Your home server has been set to {ctx.guild.name}.\
+            content = f"Your home server has been set to `{ctx.guild.name}`.\
                 \n\nThe \"home server\" is used for leaderboards and other server specific commands.\
                 \n\nTo change this later, just run `{ctx.prefix}sethome` in your main server.",
         ))
