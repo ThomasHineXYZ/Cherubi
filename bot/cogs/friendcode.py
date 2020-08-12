@@ -94,16 +94,31 @@ class FriendCode(commands.Cog):
             ))
             return
 
-        # For every result returned, send an embed with the friend code and
+        # Send the instructions message
+        await ctx.send(embed = lib.embedder.make_embed(
+            type = "info",
+            title = f"F.C.'s for {target.display_name}",
+            content = f"The friend codes below are for {target.display_name} and you can copy-paste the message below \
+                right into Pokemon GO's Add Friend page. Since Pokemon GO only uses the first 12 characters in a \
+                copy-paste to the Add Friend page."
+        ))
+
+        # For every result returned, send a message with the friend code
         for result in results:
             code = str(result['code']).zfill(12)
-            await ctx.send(embed = lib.embedder.make_embed(
-                type = "info",
-                title = f"F.C. for {result['identifier']}",
-                content = code,
-                thumbnail = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}",
-                footer = f"Owned by {target.display_name}"
-            ))
+            await ctx.send(f"{code} <- {result['identifier']}")
+
+            # NOTE: This currently doesn't quite work because on IOS you can't
+            # copy from an embed's content, but on Android you can. So this is
+            # being disabled until Discord fixes that.
+            # await ctx.send(embed = lib.embedder.make_embed(
+            #     type = "info",
+            #     title = f"F.C. for {result['identifier']}",
+            #     title_url = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}",
+            #     content = code,
+            #     thumbnail = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}",
+            #     footer = f"Owned by {target.display_name}"
+            # ))
 
     @friendcode_group.command(
         name = "add",
