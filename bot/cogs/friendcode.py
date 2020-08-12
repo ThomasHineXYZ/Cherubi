@@ -98,9 +98,9 @@ class FriendCode(commands.Cog):
         await ctx.send(embed = lib.embedder.make_embed(
             type = "info",
             title = f"F.C.'s for {target.display_name}",
-            content = f"The friend codes below are for {target.display_name} and you can copy-paste the message below \
-                right into Pokemon GO's Add Friend page. Since Pokemon GO only uses the first 12 characters in a \
-                copy-paste to the Add Friend page.",
+            content = f"The friend codes below are for `{target.display_name}`.\n\nYou can copy-paste the message below \
+                right into Pokemon GO's Add Friend page, since Pokemon GO only uses the first 12 characters in a \
+                paste to the Add Friend page.",
             footer = "This message will self-destruct in 60 seconds"
         ), delete_after=60)
 
