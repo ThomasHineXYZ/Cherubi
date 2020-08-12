@@ -113,10 +113,10 @@ class FriendCode(commands.Cog):
         usage = "<trainer name> <friend code>",
         help = "This adds the given friend code to your list. If you run this again with the same trainer name, it'll change the friend code for it."
     )
-    async def add_subcommand(self, ctx, input_identifier, code, code_part2 = None, code_part3 = None):
+    async def add_subcommand(self, ctx, input_identifier, code, code_part2 = "", code_part3 = ""):
         # This and the additional two code "parts" are for if the user
         # uses a separated version of the friend code.
-        if code_part2 is not None:
+        if code_part2 != "" or code_part3 != "":
             code = code + code_part2 + code_part3
 
         # Checks if the identifier if over 16 characters long. If so then send
