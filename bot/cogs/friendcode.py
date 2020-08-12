@@ -100,7 +100,8 @@ class FriendCode(commands.Cog):
             title = f"F.C.'s for {target.display_name}",
             content = f"The friend codes below are for {target.display_name} and you can copy-paste the message below \
                 right into Pokemon GO's Add Friend page. Since Pokemon GO only uses the first 12 characters in a \
-                copy-paste to the Add Friend page."
+                copy-paste to the Add Friend page.",
+            footer = "This message will self-destruct in 60 seconds"
         ), delete_after=60)
 
         # For every result returned, send a message with the friend code
