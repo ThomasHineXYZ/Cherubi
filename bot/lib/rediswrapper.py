@@ -13,25 +13,25 @@ class Redis():
     env_path = Path('.') / env_file_name
     load_dotenv(dotenv_path=env_path)
 
-    # Check if .env.local exists, if so, load up those variables, overriding the
-    # previously set ones
+    # Check if .env.local exists, if so, load up those variables, overriding
+    # the previously set ones
     local_env_file_name = env_file_name + '.local'
     local_env_path = Path('.') / local_env_file_name
     if os.path.isfile(local_env_file_name):
         load_dotenv(dotenv_path=local_env_path, override=True)
 
-    def __init__(self, prefix = None):
+    def __init__(self, prefix=None):
         self._redis = redis.Redis(
-            host = os.environ['REDIS_HOST'],
-            port = os.environ['REDIS_PORT'],
-            db = os.environ['REDIS_DB']
+            host=os.environ['REDIS_HOST'],
+            port=os.environ['REDIS_PORT'],
+            db=os.environ['REDIS_DB']
         )
         self._prefix = prefix + ":" if prefix else ""
 
     def __enter__(self):
         return self
 
-    def get(self, key, include_prefix = True):
+    def get(self, key, include_prefix=True):
         if include_prefix:
             key = self._prefix + key
 
@@ -52,10 +52,12 @@ class Redis():
 
         return values
 
-    def keys(self, filter = None):
-        return self._redis.keys(f"{self._prefix}{filter}" if filter else f"{self._prefix}*")
+    def keys(self, filter=None):
+        return self._redis.keys(
+            f"{self._prefix}{filter}" if filter else f"{self._prefix}*"
+        )
 
-    def set(self, key, value, expiry = 0):
+    def set(self, key, value, expiry=0):
         key = self._prefix + key
 
         if expiry < 0:

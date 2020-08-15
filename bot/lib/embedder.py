@@ -65,41 +65,42 @@ colours = {
 # dictionary of tuples for the fields
 separator = (u"\u200B", u"\u200B", False)
 
+
 def make_embed(
-    colour = None,
-    content = None,
-    fields = None,
-    footer = None,
-    footer_icon = None,
-    header = None,
-    icon = None,
-    image = '',
-    thumbnail = '',
-    title = None,
-    title_url = None,
-    type = ''
+    colour=None,
+    content=None,
+    fields=None,
+    footer=None,
+    footer_icon=None,
+    header=None,
+    icon=None,
+    image='',
+    thumbnail='',
+    title=None,
+    title_url=None,
+    type=''
 ):
     type_icon_hosting = "https://raw.githubusercontent.com/guitaristtom/shiny-bot/master/bot/assets/icons"
     types = {
-        'error':{
-            'icon':f'{type_icon_hosting}/error.png',
-            'colour':'red'
+        'error': {
+            'icon': f'{type_icon_hosting}/error.png',
+            'colour': 'red'
         },
-        'warning':{
-            'icon':f'{type_icon_hosting}/warning.png',
-            'colour':'gold'
+        'warning': {
+            'icon': f'{type_icon_hosting}/warning.png',
+            'colour': 'gold'
         },
-        'info':{
-            'icon':f'{type_icon_hosting}/information.png',
-            'colour':'blurple'
+        'info': {
+            'icon': f'{type_icon_hosting}/information.png',
+            'colour': 'blurple'
         },
-        'success':{
-            'icon':f'{type_icon_hosting}/success.png',
-            'colour':'green'
+        'success': {
+            'icon': f'{type_icon_hosting}/success.png',
+            'colour': 'green'
         },
-        'help':{
-            'icon':f'{type_icon_hosting}/help.png',
-            'colour':'blue'
+        'help': {
+            'icon': f'{type_icon_hosting}/help.png',
+            'colour': 'blue'
         }
     }
 
@@ -132,9 +133,9 @@ def make_embed(
 
     embed = discord.Embed(
         description=content,
-        title = header,
-        colour = embed_colour,
-        timestamp = datetime.utcnow()
+        title=header,
+        colour=embed_colour,
+        timestamp=datetime.utcnow()
     )
 
     embed.set_author(name=title, icon_url=embed_icon, url=title_url)
