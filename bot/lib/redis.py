@@ -24,7 +24,7 @@ class Redis():
             port = os.environ['REDIS_PORT'],
             db = os.environ['REDIS_DB']
         )
-        self._prefix = prefix + ":" if prefix else None
+        self._prefix = prefix + ":" if prefix else ""
 
     def __enter__(self):
         return self
@@ -37,15 +37,16 @@ class Redis():
         information['value'] = self._redis.get(key)
         information['ttl'] = self._redis.ttl(f"{key}")
 
-        print(self._redis.ttl(key))
-
         return information
+
+    def list(self, filter = None):
+        return self._redis.keys(f"{self._prefix}{filter}" if filter else f"{self._prefix}*")
 
     def set(self, key, value, expiry = 0):
         key = self._prefix + key
 
         if expiry < 0:
-            print("You can't have a negative time value")
+            raise ValueError(f"You can't have a negative time value.")
         elif expiry > 0:
             self._redis.setex(key, expiry, value)
         else:
