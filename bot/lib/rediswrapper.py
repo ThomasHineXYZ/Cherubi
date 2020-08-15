@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-from dotenv import load_dotenv
 from pathlib import Path
 import os
+
+from dotenv import load_dotenv
 import redis
+
 
 class Redis():
     # Load up the environment variables
@@ -29,8 +31,9 @@ class Redis():
     def __enter__(self):
         return self
 
-    def get(self, key):
-        key = self._prefix + key
+    def get(self, key, include_prefix = True):
+        if include_prefix:
+            key = self._prefix + key
 
         information = {}
         information['key'] = key
@@ -39,7 +42,17 @@ class Redis():
 
         return information
 
-    def list(self, filter = None):
+    def getmulti(self, keys):
+        values = []
+        for key in keys:
+            if isinstance(key, bytes):
+                values.append(self.get(key.decode("utf-8"), False))
+            else:
+                values.append(self.get(key), False)
+
+        return values
+
+    def keys(self, filter = None):
         return self._redis.keys(f"{self._prefix}{filter}" if filter else f"{self._prefix}*")
 
     def set(self, key, value, expiry = 0):
@@ -51,3 +64,7 @@ class Redis():
             self._redis.setex(key, expiry, value)
         else:
             self._redis.set(key, value)
+
+    def setmulti(self, list):
+        for key, value, expiry in list:
+            self.set(key, value, expiry)
