@@ -2,3 +2,4 @@ discord.py ~= 1.3.4
 PyGitHub
 mysql-connector-python ~= 8.0.21
 python-dotenv == 0.14.0
+redis ~= 3.5.3
