@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 from pathlib import Path
-import os
-
 from dotenv import load_dotenv
+import os
 import redis
 
 
@@ -46,7 +45,7 @@ class Redis():
         values = []
         for key in keys:
             if isinstance(key, bytes):
-                values.append(self.get(key.decode("utf-8"), False))
+                values.append(self.get(key.decode("UTF-8"), False))
             else:
                 values.append(self.get(key), False)
 
@@ -61,7 +60,7 @@ class Redis():
         key = self._prefix + key
 
         if expiry < 0:
-            raise ValueError(f"You can't have a negative time value.")
+            raise ValueError("You can't have a negative time value.")
         elif expiry > 0:
             self._redis.setex(key, expiry, value)
         else:
