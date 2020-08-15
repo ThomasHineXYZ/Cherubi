@@ -30,6 +30,19 @@ class Redis():
     def __enter__(self):
         return self
 
+    def delete(self, key, include_prefix=True):
+        if include_prefix:
+            key = self._prefix + key
+
+        self._redis.delete(key)
+
+    def deletemulti(self, keys, include_prefix=True):
+        for key in keys:
+            if isinstance(key, bytes):
+                self.delete(key.decode("UTF-8"), include_prefix)
+            else:
+                self.delete(key, include_prefix)
+
     def get(self, key, include_prefix=True):
         if include_prefix:
             key = self._prefix + key
@@ -41,13 +54,13 @@ class Redis():
 
         return information
 
-    def getmulti(self, keys):
+    def getmulti(self, keys, include_prefix=True):
         values = []
         for key in keys:
             if isinstance(key, bytes):
-                values.append(self.get(key.decode("UTF-8"), False))
+                values.append(self.get(key.decode("UTF-8"), include_prefix))
             else:
-                values.append(self.get(key), False)
+                values.append(self.get(key), include_prefix)
 
         return values
 
