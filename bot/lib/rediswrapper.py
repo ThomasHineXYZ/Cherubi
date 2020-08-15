@@ -22,6 +22,7 @@ class Redis():
     def __init__(self, prefix=None):
         self._redis = redis.Redis(
             host=os.environ['REDIS_HOST'],
+            password=os.environ['REDIS_PASSWORD'] or None,
             port=os.environ['REDIS_PORT'],
             db=os.environ['REDIS_DB']
         )
@@ -42,6 +43,19 @@ class Redis():
                 self.delete(key.decode("UTF-8"), include_prefix)
             else:
                 self.delete(key, include_prefix)
+
+    def expire(self, key, ttl, include_prefix=True):
+        if include_prefix:
+            key = self._prefix + key
+
+        self._redis.expire(key, ttl)
+
+    def expiremulti(self, data, include_prefix=True):
+        for key, ttl in data:
+            if isinstance(key, bytes):
+                self.expire(key.decode("UTF-8"), ttl, include_prefix)
+            else:
+                self.expire(key, ttl, include_prefix)
 
     def get(self, key, include_prefix=True):
         if include_prefix:
