@@ -102,12 +102,12 @@ class FriendCode(commands.Cog):
                 right into Pokemon GO's Add Friend page, since Pokemon GO only uses the first 12 characters in a \
                 paste to the Add Friend page.",
             footer = "This message will self-destruct in 60 seconds"
-        ), delete_after=60)
+        ), delete_after = 60)
 
         # For every result returned, send a message with the friend code
         for result in results:
             code = str(result['code']).zfill(12)
-            await ctx.send(f"{code} <- {result['identifier']}")
+            await ctx.send(f"{code} <- {result['identifier']}", delete_after = 60 * 15)
 
             # NOTE: This currently doesn't quite work because on IOS you can't
             # copy from an embed's content, but on Android you can. So this is
