@@ -187,26 +187,7 @@ async def changeprefix(ctx, prefix):
 @commands.is_owner()
 async def stop(ctx):
     await ctx.send("Stopping...")
-
-    # Cleanup any old messages that are still showing as up according to
-    # Redis
-    temp_redis = Redis("temp_message")
-    keys = temp_redis.keys()
-    messages = temp_redis.getmulti(keys, False)
-    for message in messages:
-        print(message)  # NOTE for debugging
-
-        # Convert the data received from Redis in to a usable set of values
-        decoded_message = message['value'].decode("UTF-8")
-        split_message = decoded_message.split(",")
-        channel_id = int(split_message[0])
-        message_id = int(split_message[1])
-
-        # Find the Discord channel, and then delete the message(s) in it
-        channel = client.get_channel(channel_id)
-
-        await channel.delete_messages([discord.Object(message_id)])
-
+    print("`stop` command was run. Stopping...")
     await client.close()
 
 # Debug commands meant for when working on the bot

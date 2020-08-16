@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import os
 
+
 class Example(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -13,6 +14,7 @@ class Example(commands.Cog):
     @commands.check(user_is_author)
     async def example(self, ctx):
         await ctx.send('Hoorah!')
+
 
 def setup(client):
     client.add_cog(Example(client))
