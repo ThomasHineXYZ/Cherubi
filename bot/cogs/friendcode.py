@@ -1,13 +1,22 @@
 from discord.ext import commands
 from lib.mysql import mysql
+from lib.rediswrapper import Redis
 from typing import Optional
 import discord
 import lib.embedder
-import os
+import uuid
+
 
 class FriendCode(commands.Cog):
     def __init__(self, client):
         self.client = client
+        print("Loading friendcode cog")
+
+        # Set up Redis
+        self.temp_redis = Redis("temp_message:friendcode")
+
+    def cog_unload(self):
+        print("Unloading friendcode cog")
 
     def is_guild_owner():
         def predicate(ctx):
@@ -94,32 +103,52 @@ class FriendCode(commands.Cog):
             ))
             return
 
-        # Send the instructions message
-        await ctx.send(embed = lib.embedder.make_embed(
-            type = "info",
-            title = f"F.C.'s for {target.display_name}",
-            content = f"The friend codes below are for `{target.display_name}`.\n\nYou can copy-paste the message below \
-                right into Pokemon GO's Add Friend page, since Pokemon GO only uses the first 12 characters in a \
-                paste to the Add Friend page.",
-            footer = "This message will self-destruct in 60 seconds"
-        ), delete_after = 60)
+        # Send the instructions message and store the info in Redis for cleanup
+        # later if needed
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
+            type="info",
+            title=f"F.C.'s for {target.display_name}",
+            content=f"The friend codes below are for `{target.display_name}`.\
+                \n\nYou can copy-paste the message below right into Pokemon \
+                GO's Add Friend page, since Pokemon GO only uses the first \
+                12 characters in a paste to the Add Friend page.",
+            footer="This message will self-destruct in 60 seconds"
+        ), delete_after=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id}",
+            delete_delay
+        )
 
-        # For every result returned, send a message with the friend code
+        # For every result returned, send a message with the friend code. Also
+        # store the info in Redis for cleanup later if needed
+        delete_delay = 60 * 15
         for result in results:
             code = str(result['code']).zfill(12)
-            await ctx.send(f"{code} <- {result['identifier']}", delete_after = 60 * 15)
+            message = await ctx.send(
+                f"{code} <- {result['identifier']}",
+                delete_after=delete_delay
+            )
+
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id}",
+                delete_delay
+            )
 
             # NOTE: This currently doesn't quite work because on IOS you can't
             # copy from an embed's content, but on Android you can. So this is
             # being disabled until Discord fixes that.
+            # url = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}"
             # await ctx.send(embed = lib.embedder.make_embed(
             #     type = "info",
             #     title = f"F.C. for {result['identifier']}",
-            #     title_url = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}",
+            #     title_url = url,
             #     content = code,
-            #     thumbnail = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}",
+            #     thumbnail = url,
             #     footer = f"Owned by {target.display_name}"
-            # ))
+            # ), delete_after=delete_delay)
 
     @friendcode_group.command(
         name = "add",
