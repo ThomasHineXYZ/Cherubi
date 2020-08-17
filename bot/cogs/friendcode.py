@@ -238,15 +238,20 @@ again with the same trainer name, it'll change the friend code for it."
         ])
         db.close()
 
+        # Set up the output text ahead of time so that we can add in info if
+        # needed.
+        output = f"Added friend code `{code}` for `{input_identifier}`."
+
         # Delete the user's command message, for privacy reasons
-        await ctx.message.delete()
+        if not isinstance(ctx.message.channel, discord.DMChannel):
+            await ctx.message.delete()
+            output += "\n\nYour message was deleted for privacy reasons."
 
         delete_delay = 60
         message = await ctx.send(embed=lib.embedder.make_embed(
             type="success",
             title=f"Added Friend Code",
-            content=f"Added friend code `{code}` for `{input_identifier}`.\n\n\
-Your message was deleted for privacy reasons."
+            content=output
         ), delete_after=delete_delay)
 
         expire_time = datetime.now() + timedelta(seconds=delete_delay)

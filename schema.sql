@@ -15,7 +15,7 @@ CREATE TABLE `checks` (
 CREATE TABLE `friend_codes` (
   `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
   `identifier` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The trainer name or other identifying text',
-  `code` bigint(12) unsigned NOT NULL COMMENT 'The friendcode itself',
+  `code` bigint(12) unsigned NOT NULL COMMENT 'The friend code itself',
   `updated` datetime NOT NULL COMMENT 'The datetime for when it was added or updated',
   PRIMARY KEY (`user_id`,`identifier`),
   UNIQUE KEY `user_id_identifier` (`user_id`,`identifier`),
