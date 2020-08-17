@@ -155,8 +155,9 @@ subcommands that are below.",
             # NOTE: This currently doesn't quite work because on IOS you can't
             # copy from an embed's content, but on Android you can. So this is
             # being disabled until Discord fixes that.
+            # delete_delay = 60 * 15
             # url = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}"
-            # await ctx.send(embed = lib.embedder.make_embed(
+            # message = await ctx.send(embed = lib.embedder.make_embed(
             #     type = "info",
             #     title = f"F.C. for {result['identifier']}",
             #     title_url = url,
@@ -323,11 +324,20 @@ command is not mobile friendly."
         for result in results:
             fields.append((result['identifier'], result['code'], True))
 
-        await ctx.send(embed=lib.embedder.make_embed(
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
             type="info",
             title=f"F.C. List for {ctx.author.display_name}",
-            fields=fields
-        ))
+            fields=fields,
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
     @friendcode_group.command(
         name="listall",
@@ -449,7 +459,7 @@ command is not mobile friendly"
         usage="<public | private | hidden>",
         help="This lets you change your visiblity to either public, private, \
 or hidden depending what you want.\n\n\
-Public: lets anyone on any server you're in tag you and see your friend \
+Public: lets anyone on any server you're in to tag you and see your friend \
 codes.\n\n\
 Private: lets only your home server see your friend codes.\n\n\
 Hidden: lets no one tag you to see your friend codes. You have to invoke \
