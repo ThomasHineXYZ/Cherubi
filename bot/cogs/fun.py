@@ -37,8 +37,8 @@ class Fun(commands.Cog):
         if not self.client.user.mentioned_in(message):
             return
 
+        # Remove the tag bit
         content = message.content.replace(f"<@!{self.client.user.id}>", "")
-        content = re.sub(r"[^a-zA-Z0-9]", "", content)
         content = content.strip()
 
         aliases = self.client.get_command("hello").aliases
@@ -46,6 +46,10 @@ class Fun(commands.Cog):
         if (message.content.startswith(f"<@!{self.client.user.id}>")
             and content in aliases):
             return
+
+        # Remove any special characters
+        content = re.sub(r"[^a-zA-Z0-9]", "", content)
+        content = content.strip()
 
         if content.upper() in (name.upper() for name in self.greetings):
             channel = self.client.get_channel(message.channel.id)
