@@ -242,6 +242,20 @@ again with the same trainer name, it'll change the friend code for it."
             content=f"Added friend code `{code}` for `{input_identifier}`."
         ))
 
+    @friendcode_group.group(
+        name="help",
+        brief="Runs the equivalent of \"help friendcode\"",
+        description="Cherubi Bot - Shiny Checklist System",
+        help=""
+    )
+    async def shiny_group(self, ctx):
+        """Basically an alias for the help command for this
+
+        [description]
+        """
+        await ctx.send(f"_This is the equivalent of running:_\n`{ctx.prefix}help friendcode`")
+        await ctx.send_help("friendcode")
+
     @friendcode_group.command(
         name="list",
         aliases=["l"],
