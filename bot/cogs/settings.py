@@ -1,19 +1,25 @@
+from datetime import datetime, timedelta
 from discord.ext import commands
 from lib.mysql import mysql
-import discord
+from lib.rediswrapper import Redis
 import lib.embedder
-import os
+import uuid
+
 
 class Settings(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+        # Set up Redis
+        self.temp_redis = Redis("temp_message:settings")
+
     @commands.command(
-        name = "sethome",
-        aliases = ["setguild", "setserver"],
-        brief = "Set your home server",
-        description = "Settings - Set Home Server",
-        help = "Run this command to change your home server to the one you are currently in"
+        name="sethome",
+        aliases=["setguild", "setserver"],
+        brief="Set your home server",
+        description="Settings - Set Home Server",
+        help="Run this command to change your home server to the one you \
+are currently in"
     )
     @commands.guild_only()
     async def sethome(self, ctx):
@@ -26,13 +32,21 @@ class Settings(commands.Cog):
         db.execute(query, [ctx.author.id, ctx.guild.id])
         db.close()
 
-        await ctx.send(embed = lib.embedder.make_embed(
-            type = "info",
-            title = "Home Server Set!",
-            content = f"Your home server has been set to `{ctx.guild.name}`.\
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
+            type="info",
+            title="Home Server Set!",
+            content=f"Your home server has been set to `{ctx.guild.name}`.\
                 \n\nThe \"home server\" is used for leaderboards and other server specific commands.\
                 \n\nTo change this later, just run `{ctx.prefix}sethome` in your main server.",
-        ))
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
 
 def setup(client):
