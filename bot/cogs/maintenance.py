@@ -79,6 +79,9 @@ class Maintenance(commands.Cog):
             # It's in a try/except so that any exceptions can be ignored.
             channel = self.client.get_channel(channel_id)
 
+            # NOTE ** This doesn't work for DMs.**
+            # Might be something to look in to later. But as of right now it's
+            # not a huge concern.
             try:
                 self.temp_redis.delete(message['key'], False)
                 await channel.delete_messages([discord.Object(message_id)])
