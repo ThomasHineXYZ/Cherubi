@@ -13,13 +13,14 @@ CREATE TABLE `checks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='A table to store checks persistently';
 
 CREATE TABLE `friend_codes` (
-  `user_id` bigint(20) unsigned NOT NULL,
-  `identifier` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `code` bigint(12) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
+  `identifier` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The trainer name or other identifying text',
+  `code` bigint(12) unsigned NOT NULL COMMENT 'The friendcode itself',
+  `updated` datetime NOT NULL COMMENT 'The datetime for when it was added or updated',
   PRIMARY KEY (`user_id`,`identifier`),
   UNIQUE KEY `user_id_identifier` (`user_id`,`identifier`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='The storage for friend codes';
 
 CREATE TABLE `guild_preferences` (
   `guild` bigint(20) NOT NULL COMMENT 'Discord Guild ID',

@@ -205,7 +205,7 @@ again with the same trainer name, it'll change the friend code for it."
 
         # Check that the friend code was numbers and that it was 12 digits
         # long, if it isn't then send an error embed and return
-        if not code.isdigit() or len(code) != 12:
+        if not code.isdigit():
             await ctx.send(embed=lib.embedder.make_embed(
                 type="error",
                 title=f"Error Adding Friend Code",
@@ -225,9 +225,11 @@ again with the same trainer name, it'll change the friend code for it."
 
         db = mysql()
         query = """
-            INSERT INTO friend_codes (user_id, identifier, code)
-            VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE code = VALUES(code);
+            INSERT INTO friend_codes (user_id, identifier, code, updated)
+            VALUES (%s, %s, %s, NOW())
+            ON DUPLICATE KEY UPDATE
+                code = VALUES(code),
+                updated = VALUES(updated);
         """
         db.execute(query, [
             ctx.message.author.id,
@@ -236,11 +238,23 @@ again with the same trainer name, it'll change the friend code for it."
         ])
         db.close()
 
-        await ctx.send(embed=lib.embedder.make_embed(
+        # Delete the user's command message, for privacy reasons
+        await ctx.message.delete()
+
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
             type="success",
             title=f"Added Friend Code",
-            content=f"Added friend code `{code}` for `{input_identifier}`."
-        ))
+            content=f"Added friend code `{code}` for `{input_identifier}`.\n\n\
+Your message was deleted for privacy reasons."
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
     @friendcode_group.group(
         name="help",
