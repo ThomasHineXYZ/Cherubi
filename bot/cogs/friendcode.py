@@ -284,12 +284,14 @@ again with the same trainer name, it'll change the friend code for it."
         name="help",
         brief="Runs the equivalent of \"help friendcode\"",
         description="Cherubi Bot - Shiny Checklist System",
-        help=""
+        help="",
+        hidden=True
     )
-    async def shiny_group(self, ctx):
-        """Basically an alias for the help command for this
+    async def help_subcommand(self, ctx):
+        """Just an alias for the help command for this
 
-        [description]
+        This is an alias for the help page for friendcode for if anyone types
+        it
         """
         await ctx.send(f"_This is the equivalent of running:_\n`{ctx.prefix}help friendcode`")
         await ctx.send_help("friendcode")
@@ -404,6 +406,39 @@ command is not mobile friendly"
                 title=f"Removed Friend Code",
                 content=f"Removed {identifier} from your list."
             ))
+
+    @friendcode_group.command(
+        name="setmain",
+        brief="Sets your main friend code.",
+        description="Cherubi Bot - Friend Code Sharing System",
+        usage="<trainer name>",
+        help="Changes your main friend code to being the given one."
+    )
+    async def setmain_subcommand(self, ctx, identifier):
+        db = mysql()
+        # Remove any friend codes that the user has set as their main
+        query = """
+            UPDATE friend_codes
+            SET main = 0
+            WHERE user_id = %s;
+        """
+        db.execute(query, [ctx.author.id])
+
+        # Then set the new one
+        query = """
+            UPDATE friend_codes
+            SET main = 1
+            WHERE user_id = %s
+            AND identifier = %s;
+        """
+        db.execute(query, [ctx.author.id, identifier])
+        db.close()
+
+        await ctx.send(embed=lib.embedder.make_embed(
+            type="success",
+            title="Changed Main Friend Code",
+            content=f"Changed your main friend code to {identifier}."
+        ))
 
     @friendcode_group.command(
         name="visibility",
