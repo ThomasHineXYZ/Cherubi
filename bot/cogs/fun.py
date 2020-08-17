@@ -120,7 +120,6 @@ class Fun(commands.Cog):
 
         # Remove duplicates to save a tiny bit more memory
         self.greeting_watch = list(OrderedDict.fromkeys(self.greeting_watch))
-        print(self.greeting_watch)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
