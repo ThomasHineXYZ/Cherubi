@@ -58,6 +58,10 @@ class Fun(commands.Cog):
             "Why hello there",
             "Yo!",
         ]
+        self.greeting_watch = [
+            "greets",
+            "how you doing",
+        ]
         self.add_special_greetings.start()
 
     def cog_unload(self):
@@ -78,6 +82,27 @@ class Fun(commands.Cog):
         self.greetings.append(
             f"<@!{self.client.user.id}>, <@!{self.client.user.id}> who?"
         )
+
+        # Set up the greeting watch list
+        for greeting in self.greetings:
+            value = greeting.lower()
+            self.greeting_watch.append(value)
+
+            # Also
+            value = re.sub(r"[^a-zA-Z0-9\-_]", "", value)
+            self.greeting_watch.append(value)
+
+        # Add several different hey variants to the watch list
+        saying = "hey"
+        saying2 = "hay"
+        for _ in range(10):
+            saying += "y"
+            self.greeting_watch.append(saying)
+
+            saying2 += "y"
+            self.greeting_watch.append(saying2)
+
+        print(self.greeting_watch)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -120,7 +145,7 @@ class Fun(commands.Cog):
         # Checks if the message has any of the greetings from above in it,
         # if so, then assume the person is trying to say hi and send the random
         # greeting to the channel that the message was sent from.
-        if content.upper() in (name.upper() for name in self.greetings):
+        if content.lower() in (greeting for greeting in self.greeting_watch):
             channel = self.client.get_channel(message.channel.id)
             await channel.send(random.choice(self.greetings))
             return
