@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import random
+import re
 
 
 class Fun(commands.Cog):
@@ -37,9 +38,13 @@ class Fun(commands.Cog):
             return
 
         content = message.content.replace(f"<@!{self.client.user.id}>", "")
+        content = re.sub(r"[^a-zA-Z0-9]", "", content)
         content = content.strip()
 
-        if content in ["hello", "hi", "hey", "hiya", "yo"]:
+        aliases = self.client.get_command("hello").aliases
+        aliases.append("hello")
+        if (message.content.startswith(f"<@!{self.client.user.id}>")
+            and content in aliases):
             return
 
         if content.upper() in (name.upper() for name in self.greetings):
