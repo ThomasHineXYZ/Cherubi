@@ -122,6 +122,7 @@ subcommands that are below.",
             type="info",
             title=f"F.C.'s for {target.display_name}",
             content=f"The friend codes below are for `{target.display_name}`.\
+                \n\nThe codes below will auto-delete in 15 minutes. \
                 \n\nYou can copy-paste the message below right into Pokemon \
                 GO's Add Friend page, since Pokemon GO only uses the first \
                 12 characters in a paste to the Add Friend page.",
@@ -486,7 +487,7 @@ Hidden: lets no one tag you to see your friend codes. You have to invoke \
             await ctx.send(embed=lib.embedder.make_embed(
                 type="info",
                 title=f"Your F.C. Visibility",
-                content=f"Your friend code visibility is currently set to {visibility.title()}"
+                content=f"Your friend code visibility is currently set to `{visibility.title()}`"
             ))
             return
 
