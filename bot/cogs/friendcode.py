@@ -188,6 +188,24 @@ again with the same trainer name, it'll change the friend code for it."
         code_part2="",
         code_part3=""
     ):
+        # Check that the user has their home guild set. If not, then set it.
+        # Check if this was invoked from a guild
+        if not isinstance(ctx.channel, discord.DMChannel):
+            db = mysql()
+            query = """
+                SELECT
+                    user_id,
+                    home_guild
+                FROM user_preferences
+                WHERE user_id = %s;
+            """
+            results = db.query(query, [ctx.author.id])
+            db.close()
+
+            # If nothing was returned, then invoke the sethome command
+            if not results or not results[0]['home_guild']:
+                await ctx.invoke(self.client.get_command("sethome"))
+
         # This and the additional two code "parts" are for if the user
         # uses a separated version of the friend code.
         if code_part2 != "" or code_part3 != "":
