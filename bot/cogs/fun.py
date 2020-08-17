@@ -3,9 +3,11 @@ import discord
 import random
 
 
-class Example(commands.Cog):
+class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+        print("Loading fun cog")
         self.greetings = [
             "'Ello, gov'nor",
             "Ahoy",
@@ -25,6 +27,9 @@ class Example(commands.Cog):
             "Why hello there",
             "Yo!",
         ]
+
+    def cog_unload(self):
+        print("Unloading fun cog")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -51,4 +56,4 @@ class Example(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Example(client))
+    client.add_cog(Fun(client))
