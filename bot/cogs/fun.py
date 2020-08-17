@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from discord.ext import commands, tasks
 import discord
 import random
@@ -22,7 +23,6 @@ class Fun(commands.Cog):
             "G'day, mate!",
             "Goodmorrow!",
             "Greetings and salutations.",
-            "Hallo",
             "Hello stranger",
             "Hello",
             "Hello, my name is Inigo Montoya",
@@ -47,6 +47,7 @@ class Fun(commands.Cog):
             "Nice to meet you",
             "Que pasa",
             "Salute plurimam dicit",
+            "Salutations",
             "Shalom",
             "Sup, Homeslice?",
             "Sup?",
@@ -59,16 +60,28 @@ class Fun(commands.Cog):
             "Yo!",
         ]
         self.greeting_watch = [
+            "afternoon",
+            "evening",
+            "greetings"
             "greets",
+            "hallo",
+            "hay",
+            "hays",
+            "heys"
+            "how are you doing",
             "how you doing",
+            "morning",
+            "wassup",
+            "whats good",
+            "wuzzup",
         ]
-        self.add_special_greetings.start()
+        self.add_more_greeting_stuff.start()
 
     def cog_unload(self):
         print("Unloading fun cog")
 
     @tasks.loop(count=1)
-    async def add_special_greetings(self):
+    async def add_more_greeting_stuff(self):
         """Adds in special greetings when the bot is online
 
         This allows for adding greetings that require the bot to tag its own
@@ -86,22 +99,27 @@ class Fun(commands.Cog):
         # Set up the greeting watch list
         for greeting in self.greetings:
             value = greeting.lower()
+
+            # Add in all of the (lowered) greetings in to the greeting_watch
+            # list
             self.greeting_watch.append(value)
 
-            # Also
+            # Also strip any non-stadnard values from it
             value = re.sub(r"[^a-zA-Z0-9\-_]", "", value)
             self.greeting_watch.append(value)
 
         # Add several different hey variants to the watch list
         saying = "hey"
         saying2 = "hay"
-        for _ in range(10):
+        for _ in range(20):
             saying += "y"
             self.greeting_watch.append(saying)
 
             saying2 += "y"
             self.greeting_watch.append(saying2)
 
+        # Remove duplicates to save a tiny bit more memory
+        self.greeting_watch = list(OrderedDict.fromkeys(self.greeting_watch))
         print(self.greeting_watch)
 
     @commands.Cog.listener()
