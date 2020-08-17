@@ -39,7 +39,7 @@ class Fun(commands.Cog):
         content = message.content.replace(f"<@!{self.client.user.id}>", "")
         content = content.strip()
 
-        if message.content in ["hi", "hello", "hey", "yo"]:
+        if message.content in ["hello", "hi", "hey", "hiya", "yo"]:
             return
 
         if content.upper() in (name.upper() for name in self.greetings):
