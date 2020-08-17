@@ -32,7 +32,7 @@ are currently in"
         db.execute(query, [ctx.author.id, ctx.guild.id])
         db.close()
 
-        delete_delay = 60
+        delete_delay = 120
         message = await ctx.send(embed=lib.embedder.make_embed(
             type="info",
             title="Home Server Set!",
