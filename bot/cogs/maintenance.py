@@ -24,6 +24,10 @@ class Maintenance(commands.Cog):
         self.temp_redis = Redis("temp_message")
         self.temporary_messages.start()
 
+    def cog_unload(self):
+        print("Unloading maintenance cog")
+        self.temporary_messages.stop()
+
     @tasks.loop(seconds=60)
     async def temporary_messages(self):
         """Cleans up any expired messages in Redis
@@ -80,6 +84,11 @@ class Maintenance(commands.Cog):
                 await channel.delete_messages([discord.Object(message_id)])
             except Exception:
                 pass
+
+    @temporary_messages.after_loop
+    async def after_temporary_messages(self):
+        keys = self.temp_redis.keys()
+        print(f"{len(keys)} temporary messages waiting for cleanup")
 
 
 def setup(client):

@@ -184,6 +184,7 @@ async def changeprefix(ctx, prefix):
 
 
 @client.command()
+@commands.dm_only()
 @commands.is_owner()
 async def stop(ctx):
     await ctx.send("Stopping...")
