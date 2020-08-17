@@ -124,7 +124,7 @@ subcommands that are below.",
                 \n\nYou can copy-paste the message below right into Pokemon \
                 GO's Add Friend page, since Pokemon GO only uses the first \
                 12 characters in a paste to the Add Friend page.",
-            footer="This message will self-destruct in 60 seconds"
+            footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
         expire_time = datetime.now() + timedelta(seconds=delete_delay)
@@ -265,11 +265,12 @@ again with the same trainer name, it'll change the friend code for it."
             await ctx.message.delete()
             output += "\n\nYour message was deleted for privacy reasons."
 
-        delete_delay = 60
+        delete_delay = 120
         message = await ctx.send(embed=lib.embedder.make_embed(
             type="success",
             title=f"Added Friend Code",
-            content=output
+            content=output,
+            footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
         expire_time = datetime.now() + timedelta(seconds=delete_delay)

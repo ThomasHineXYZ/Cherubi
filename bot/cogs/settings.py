@@ -39,6 +39,7 @@ are currently in"
             content=f"Your home server has been set to `{ctx.guild.name}`.\
                 \n\nThe \"home server\" is used for leaderboards and other server specific commands.\
                 \n\nTo change this later, just run `{ctx.prefix}sethome` in your main server.",
+            footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
         expire_time = datetime.now() + timedelta(seconds=delete_delay)
