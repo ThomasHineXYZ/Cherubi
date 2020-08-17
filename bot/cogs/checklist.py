@@ -207,11 +207,11 @@ class Checklist(commands.Cog):
             ))
 
     @shiny_group.command(
-        name = "list",
-        aliases = ["l"],
-        brief = "Lists the shiny Pokémon that you have",
-        description = "Cherubi Bot - Shiny Checklist System (List)",
-        help = "This lists off all of the shiny Pokémon in your collection."
+        name="list",
+        aliases=["l"],
+        brief="Lists the shiny Pokémon that you have",
+        description="Cherubi Bot - Shiny Checklist System (List)",
+        help="This lists off all of the shiny Pokémon in your collection."
     )
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def list_subcommand(self, ctx, target: Optional[discord.Member]):
@@ -236,32 +236,32 @@ class Checklist(commands.Cog):
         results = db.query(query, [target.id])
         db.close()
 
-        # If the user doesn't have any shiny Pokemon in their list, tell them that
+        # If the user doesn't have any shiny Pokemon in their list, tell them
+        # that
         if not results:
-            await ctx.send(embed = lib.embedder.make_embed(
-                type = "error",
-                title = "Shiny Checklist",
-                content = f"Unfortunately {target.display_name} doesn't have any Pokémon in your shiny list...",
+            await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title="Shiny Checklist",
+                content=f"Unfortunately {target.display_name} doesn't have \
+any Pokémon in your shiny list...",
             ))
 
         else:
-            columns = {"left": "", "right": ""}
             total_count = 0
+            output = ""
             for result in results:
-                columns['left'] += f"{result['name']}\n"
-                columns['right'] += f"{result['count']}\n"
+                output += f"{result['name']}: {result['count']}\n"
                 total_count += result['count']
 
             fields = [
-                ("Pokemon", columns['left'], True),
-                ("Count", columns['right'], True),
                 ("Total:", total_count, False),
             ]
 
-            await ctx.send(embed = lib.embedder.make_embed(
-                type = "info",
-                title = f"{target.display_name}'s Shiny List:",
-                fields = fields,
+            await ctx.send(embed=lib.embedder.make_embed(
+                type="info",
+                title=f"{target.display_name}'s Shiny List:",
+                content=output,
+                fields=fields,
             ))
 
     def get_pokemon_data(self, input):
