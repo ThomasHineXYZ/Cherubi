@@ -1,6 +1,7 @@
 from discord.ext import commands
 from dotenv import load_dotenv
 from lib.mysql import mysql
+from lib.rediswrapper import Redis
 from pathlib import Path
 import discord
 import os
@@ -181,6 +182,15 @@ async def changeprefix(ctx, prefix):
     # Then finally send the user a message saying that it is changed
     await ctx.send(f"Prefix has been changed to: {prefix}")
 
+
+@client.command()
+@commands.dm_only()
+@commands.is_owner()
+async def stop(ctx):
+    await ctx.send("Stopping...")
+    print("`stop` command was run. Stopping...")
+    await client.close()
+
 # Debug commands meant for when working on the bot
 if os.environ['DEBUG'].lower() == "true":
     @client.command()
@@ -208,6 +218,6 @@ if os.environ['DEBUG'].lower() == "true":
 # Load up the cogs
 for filename in os.listdir("./bot/cogs"):
     if filename.endswith(".py"):
-        client.load_extension(f"cogs.{filename[:-3]}");
+        client.load_extension(f"cogs.{filename[:-3]}")
 
 client.run(os.environ['DISCORD_BOT_TOKEN'])
