@@ -3,7 +3,7 @@ import discord
 import lib.embedder
 
 
-class Example(commands.Cog):
+class Help(commands.Cog):
     def __init__(self, client):
         self.client = client
 
@@ -40,5 +40,5 @@ and put help, or DM me and ask me for help.",
 
 
 def setup(client):
-    client.add_cog(Example(client))
+    client.add_cog(Help(client))
 
