@@ -51,12 +51,13 @@ subcommands that are below.",
                 up.home_guild AS home_guild,
                 up.fc_visibility AS visibility,
                 fc.identifier AS identifier,
-                fc.code AS code
+                fc.code AS code,
+                fc.main AS main
             FROM friend_codes fc
             LEFT JOIN user_preferences up ON up.user_id = fc.user_id
             WHERE fc.user_id = %s
             AND fc.identifier LIKE %s
-            ORDER BY fc.identifier ASC;
+            ORDER BY fc.main DESC, fc.identifier ASC;
         """
         results = db.query(query, [target.id, f"%{filter if filter else ''}%"])
         db.close()
@@ -140,7 +141,7 @@ subcommands that are below.",
         for result in results:
             code = str(result['code']).zfill(12)
             message = await ctx.send(
-                f"{code} <- {result['identifier']}",
+                f"{code} <- {result['identifier']}{' (main)' if result['main'] else ''}",
                 delete_after=delete_delay
             )
 
