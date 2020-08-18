@@ -68,7 +68,9 @@ class Fun(commands.Cog):
             "good night",
             "greetings"
             "greets",
+            "guten tag",
             "guten tog",
+            "gutentag",
             "gutentog",
             "hallo",
             "hay",
