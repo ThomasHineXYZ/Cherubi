@@ -62,6 +62,10 @@ class Fun(commands.Cog):
         self.greeting_watch = [
             "afternoon",
             "evening",
+            "good afternoon",
+            "good evening",
+            "good morning",
+            "good night",
             "greetings"
             "greets",
             "guten tog",
@@ -77,7 +81,10 @@ class Fun(commands.Cog):
             "morning",
             "nee how",
             "nei how",
+            "night",
             "ola",
+            "top of the morning to ya",
+            "top of the morning to you",
             "wassup",
             "whats good",
             "wuzzup",
@@ -116,14 +123,26 @@ class Fun(commands.Cog):
             self.greeting_watch.append(value)
 
         # Add several different hey variants to the watch list
-        saying = "hey"
-        saying2 = "hay"
+        saying = "hey"  # Heyyyyy
+        saying2 = "hay"  # Hayyyyyy
+        saying3 = "hel"  # Hellllllllo
+        saying4 = "he"  # Heeeeeeeeey
         for _ in range(20):
+            # Heyyyyy
             saying += "y"
             self.greeting_watch.append(saying)
 
+            # Hayyyyyy
             saying2 += "y"
             self.greeting_watch.append(saying2)
+
+            # Hellllllllo
+            saying3 += "l"
+            self.greeting_watch.append(f"{saying3}o")
+
+            # Heeeeeeeeey
+            saying4 += "e"
+            self.greeting_watch.append(f"{saying4}y")
 
         # Remove duplicates to save a tiny bit more memory
         self.greeting_watch = list(OrderedDict.fromkeys(self.greeting_watch))
