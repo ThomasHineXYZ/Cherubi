@@ -15,10 +15,9 @@ class Fun(commands.Cog):
             "A pleasure meet you",
             "Ahoy",
             "Aloha",
-            "Alright, mate?",
             "Bonjour",
             "Ciao",
-            "Ehh",
+            "Ehhhh",
             "G'day",
             "G'day, mate!",
             "Goodmorrow!",
@@ -61,6 +60,7 @@ class Fun(commands.Cog):
         ]
         self.greeting_watch = [
             "afternoon",
+            "alright, mate?",
             "evening",
             "good afternoon",
             "good evening",
@@ -78,7 +78,7 @@ class Fun(commands.Cog):
             "heys"
             "how are you doing",
             "how you doing",
-            "Kei halla",
+            "kei halla",
             "knee how",
             "morning",
             "nee how",
@@ -90,6 +90,7 @@ class Fun(commands.Cog):
             "wassup",
             "whats good",
             "wuzzup",
+            "👋",
         ]
         self.add_more_greeting_stuff.start()
 
