@@ -26,6 +26,7 @@ CREATE TABLE `friend_codes` (
 CREATE TABLE `guild_preferences` (
   `guild` bigint(20) NOT NULL COMMENT 'Discord Guild ID',
   `command_prefix` char(1) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The character that is the prefix of commands',
+  `nest_channel` bigint(20) unsigned DEFAULT NULL COMMENT 'The Guilds nest channel',
   PRIMARY KEY (`guild`),
   UNIQUE KEY `guild` (`guild`),
   KEY `index_guild` (`guild`)
