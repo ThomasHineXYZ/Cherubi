@@ -48,7 +48,7 @@ subcommands that are below.",
             db.close()
 
             if not results[0]['home_guild']:
-                delete_delay = 60
+                delete_delay = 120
                 message = await ctx.send(embed=lib.embedder.make_embed(
                     type="error",
                     title=f"Your Home Server Isn't Set",
@@ -65,7 +65,7 @@ subcommands that are below.",
                 return
 
             if not results[0]['nest_channel']:
-                delete_delay = 60
+                delete_delay = 120
                 message = await ctx.send(embed=lib.embedder.make_embed(
                     type="error",
                     title=f"Nest's for {self.client.get_guild(results[0]['home_guild'])}",
@@ -80,6 +80,8 @@ subcommands that are below.",
                     0
                 )
                 return
+
+            pass  # WIP
 
         elif isinstance(ctx.channel, discord.TextChannel):  # Guild
             # Grab the guild's channel ID
