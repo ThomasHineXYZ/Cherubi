@@ -184,36 +184,38 @@ async def changeprefix(ctx, prefix):
 
 
 @client.command()
-@commands.dm_only()
 @commands.is_owner()
-async def stop(ctx):
-    await ctx.send("Stopping...")
-    print("`stop` command was run. Stopping...")
-    await client.close()
+async def load(ctx, extension):
+    print(f"Loading {extension}")
+    await ctx.send(f"Loading {extension}")
+    client.load_extension(f"cogs.{extension}")
+
+
+@client.command()
+@commands.is_owner()
+async def unload(ctx, extension):
+    print(f"Unloading {extension}")
+    await ctx.send(f"Unloading {extension}")
+    client.unload_extension(f"cogs.{extension}")
+
+
+@client.command()
+@commands.is_owner()
+async def reload(ctx, extension):
+    print(f"Reloading {extension}")
+    await ctx.send(f"Reloading {extension}")
+    client.unload_extension(f"cogs.{extension}")
+    client.load_extension(f"cogs.{extension}")
 
 # Debug commands meant for when working on the bot
 if os.environ['DEBUG'].lower() == "true":
     @client.command()
+    @commands.dm_only()
     @commands.is_owner()
-    async def load(ctx, extension):
-        print(f"Loading {extension}")
-        await ctx.send(f"Loading {extension}")
-        client.load_extension(f"cogs.{extension}")
-
-    @client.command()
-    @commands.is_owner()
-    async def unload(ctx, extension):
-        print(f"Unloading {extension}")
-        await ctx.send(f"Unloading {extension}")
-        client.unload_extension(f"cogs.{extension}")
-
-    @client.command()
-    @commands.is_owner()
-    async def reload(ctx, extension):
-        print(f"Reloading {extension}")
-        await ctx.send(f"Reloading {extension}")
-        client.unload_extension(f"cogs.{extension}")
-        client.load_extension(f"cogs.{extension}")
+    async def stop(ctx):
+        await ctx.send("Stopping...")
+        print("`stop` command was run. Stopping...")
+        await client.close()
 
 # Load up the cogs
 for filename in os.listdir("./bot/cogs"):

@@ -51,12 +51,13 @@ subcommands that are below.",
                 up.home_guild AS home_guild,
                 up.fc_visibility AS visibility,
                 fc.identifier AS identifier,
-                fc.code AS code
+                fc.code AS code,
+                fc.main AS main
             FROM friend_codes fc
             LEFT JOIN user_preferences up ON up.user_id = fc.user_id
             WHERE fc.user_id = %s
             AND fc.identifier LIKE %s
-            ORDER BY fc.identifier ASC;
+            ORDER BY fc.main DESC, fc.identifier ASC;
         """
         results = db.query(query, [target.id, f"%{filter if filter else ''}%"])
         db.close()
@@ -121,10 +122,11 @@ subcommands that are below.",
             type="info",
             title=f"F.C.'s for {target.display_name}",
             content=f"The friend codes below are for `{target.display_name}`.\
+                \n\nThe codes below will auto-delete in 15 minutes. \
                 \n\nYou can copy-paste the message below right into Pokemon \
                 GO's Add Friend page, since Pokemon GO only uses the first \
                 12 characters in a paste to the Add Friend page.",
-            footer="This message will self-destruct in 60 seconds"
+            footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
         expire_time = datetime.now() + timedelta(seconds=delete_delay)
@@ -140,7 +142,7 @@ subcommands that are below.",
         for result in results:
             code = str(result['code']).zfill(12)
             message = await ctx.send(
-                f"{code} <- {result['identifier']}",
+                f"{code} <- {result['identifier']}{' (main)' if result['main'] else ''}",
                 delete_after=delete_delay
             )
 
@@ -154,8 +156,9 @@ subcommands that are below.",
             # NOTE: This currently doesn't quite work because on IOS you can't
             # copy from an embed's content, but on Android you can. So this is
             # being disabled until Discord fixes that.
+            # delete_delay = 60 * 15
             # url = f"https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl={code}"
-            # await ctx.send(embed = lib.embedder.make_embed(
+            # message = await ctx.send(embed = lib.embedder.make_embed(
             #     type = "info",
             #     title = f"F.C. for {result['identifier']}",
             #     title_url = url,
@@ -188,6 +191,24 @@ again with the same trainer name, it'll change the friend code for it."
         code_part2="",
         code_part3=""
     ):
+        # Check that the user has their home guild set. If not, then set it.
+        # Check if this was invoked from a guild
+        if not isinstance(ctx.channel, discord.DMChannel):
+            db = mysql()
+            query = """
+                SELECT
+                    user_id,
+                    home_guild
+                FROM user_preferences
+                WHERE user_id = %s;
+            """
+            results = db.query(query, [ctx.author.id])
+            db.close()
+
+            # If nothing was returned, then invoke the sethome command
+            if not results or not results[0]['home_guild']:
+                await ctx.invoke(self.client.get_command("sethome"))
+
         # This and the additional two code "parts" are for if the user
         # uses a separated version of the friend code.
         if code_part2 != "" or code_part3 != "":
@@ -205,7 +226,7 @@ again with the same trainer name, it'll change the friend code for it."
 
         # Check that the friend code was numbers and that it was 12 digits
         # long, if it isn't then send an error embed and return
-        if not code.isdigit() or len(code) != 12:
+        if not code.isdigit():
             await ctx.send(embed=lib.embedder.make_embed(
                 type="error",
                 title=f"Error Adding Friend Code",
@@ -225,9 +246,11 @@ again with the same trainer name, it'll change the friend code for it."
 
         db = mysql()
         query = """
-            INSERT INTO friend_codes (user_id, identifier, code)
-            VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE code = VALUES(code);
+            INSERT INTO friend_codes (user_id, identifier, code, updated)
+            VALUES (%s, %s, %s, NOW())
+            ON DUPLICATE KEY UPDATE
+                code = VALUES(code),
+                updated = VALUES(updated);
         """
         db.execute(query, [
             ctx.message.author.id,
@@ -236,11 +259,45 @@ again with the same trainer name, it'll change the friend code for it."
         ])
         db.close()
 
-        await ctx.send(embed=lib.embedder.make_embed(
+        # Set up the output text ahead of time so that we can add in info if
+        # needed.
+        output = f"Added friend code `{code}` for `{input_identifier}`."
+
+        # Delete the user's command message, for privacy reasons
+        if not isinstance(ctx.message.channel, discord.DMChannel):
+            await ctx.message.delete()
+            output += "\n\nYour message was deleted for privacy reasons."
+
+        delete_delay = 120
+        message = await ctx.send(embed=lib.embedder.make_embed(
             type="success",
             title=f"Added Friend Code",
-            content=f"Added friend code `{code}` for `{input_identifier}`."
-        ))
+            content=output,
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
+
+    @friendcode_group.group(
+        name="help",
+        brief="Runs the equivalent of \"help friendcode\"",
+        description="Cherubi Bot - Shiny Checklist System",
+        help="",
+        hidden=True
+    )
+    async def help_subcommand(self, ctx):
+        """Just an alias for the help command for this
+
+        This is an alias for the help page for friendcode for if anyone types
+        it
+        """
+        await ctx.send(f"_This is the equivalent of running:_\n`{ctx.prefix}help friendcode`")
+        await ctx.send_help("friendcode")
 
     @friendcode_group.command(
         name="list",
@@ -268,11 +325,20 @@ command is not mobile friendly."
         for result in results:
             fields.append((result['identifier'], result['code'], True))
 
-        await ctx.send(embed=lib.embedder.make_embed(
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
             type="info",
             title=f"F.C. List for {ctx.author.display_name}",
-            fields=fields
-        ))
+            fields=fields,
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
     @friendcode_group.command(
         name="listall",
@@ -354,6 +420,39 @@ command is not mobile friendly"
             ))
 
     @friendcode_group.command(
+        name="setmain",
+        brief="Sets your main friend code.",
+        description="Cherubi Bot - Friend Code Sharing System",
+        usage="<trainer name>",
+        help="Changes your main friend code to being the given one."
+    )
+    async def setmain_subcommand(self, ctx, identifier):
+        db = mysql()
+        # Remove any friend codes that the user has set as their main
+        query = """
+            UPDATE friend_codes
+            SET main = 0
+            WHERE user_id = %s;
+        """
+        db.execute(query, [ctx.author.id])
+
+        # Then set the new one
+        query = """
+            UPDATE friend_codes
+            SET main = 1
+            WHERE user_id = %s
+            AND identifier = %s;
+        """
+        db.execute(query, [ctx.author.id, identifier])
+        db.close()
+
+        await ctx.send(embed=lib.embedder.make_embed(
+            type="success",
+            title="Changed Main Friend Code",
+            content=f"Changed your main friend code to {identifier}."
+        ))
+
+    @friendcode_group.command(
         name="visibility",
         aliases=["vis", "v"],
         brief="Changes your friend code visibility.",
@@ -361,7 +460,7 @@ command is not mobile friendly"
         usage="<public | private | hidden>",
         help="This lets you change your visiblity to either public, private, \
 or hidden depending what you want.\n\n\
-Public: lets anyone on any server you're in tag you and see your friend \
+Public: lets anyone on any server you're in to tag you and see your friend \
 codes.\n\n\
 Private: lets only your home server see your friend codes.\n\n\
 Hidden: lets no one tag you to see your friend codes. You have to invoke \
@@ -388,7 +487,7 @@ Hidden: lets no one tag you to see your friend codes. You have to invoke \
             await ctx.send(embed=lib.embedder.make_embed(
                 type="info",
                 title=f"Your F.C. Visibility",
-                content=f"Your friend code visibility is currently set to {visibility.title()}"
+                content=f"Your friend code visibility is currently set to `{visibility.title()}`"
             ))
             return
 

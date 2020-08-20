@@ -1,41 +1,6 @@
 import discord
 from datetime import datetime
 
-emoji_letters = {
-    "A": "🇦",
-    "B": "🇧",
-    "C": "🇨",
-    "D": "🇩",
-    "E": "🇪",
-    "F": "🇫",
-    "G": "🇬",
-    "H": "🇭",
-    "I": "🇮",
-    "J": "🇯",
-    "K": "🇰",
-    "L": "🇱",
-    "M": "🇲",
-    "N": "🇳",
-    "O": "🇴",
-    "P": "🇵",
-    "Q": "🇶",
-    "R": "🇷",
-    "S": "🇸",
-    "T": "🇹",
-    "U": "🇺",
-    "V": "🇻",
-    "W": "🇼",
-    "X": "🇽",
-    "Y": "🇾",
-    "Z": "🇿",
-    "arrow-back": "◀️",
-    "arrow-forward": "▶️",
-    "arrow-previous": "⏪",
-    "arrow-next": "⏩",
-    "arrow-first": "⏮️",
-    "arrow-last": "⏭️",
-}
-
 colours = {
     "blue": discord.Colour.blue(),
     "blurple": discord.Colour.blurple(),
