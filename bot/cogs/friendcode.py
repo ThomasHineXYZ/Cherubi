@@ -122,10 +122,10 @@ subcommands that are below.",
             type="info",
             title=f"F.C.'s for {target.display_name}",
             content=f"The friend codes below are for `{target.display_name}`.\
-                \n\nThe codes below will auto-delete in 15 minutes. \
-                \n\nYou can copy-paste the message below right into Pokemon \
-                GO's Add Friend page, since Pokemon GO only uses the first \
-                12 characters in a paste to the Add Friend page.",
+\n\nThe codes below will auto-delete in 15 minutes. \
+\n\nYou can copy-paste the message below right into Pokemon \
+GO's Add Friend page, since Pokemon GO only uses the first \
+12 characters in a paste to the Add Friend page.",
             footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
