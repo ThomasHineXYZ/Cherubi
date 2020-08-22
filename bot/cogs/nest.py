@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from discord.ext import commands
 from lib.mysql import mysql
 from lib.rediswrapper import Redis
+from typing import Optional
 import discord
 import lib.embedder
 import uuid
@@ -18,21 +19,21 @@ class Nest(commands.Cog):
     def cog_unload(self):
         print("Unloading nest cog")
 
+    def is_guild_owner():
+        def predicate(ctx):
+            return ctx.guild is not None and \
+                ctx.guild.owner_id == ctx.author.id
+        return commands.check(predicate)
+
     @commands.group(
         name="nest",
-        aliases=["n"],
         brief="Nest System",
         description="Cherubi Bot - Nest Management System",
         usage="<report>",
-        help="You can run the command without a tagged user to bring up your \
-info, tag a user to bring up theirs, or run one of the \
-subcommands that are below.",
+        help="",
         invoke_without_command=True
     )
-    async def nest_group(
-        self,
-        ctx
-    ):
+    async def nest_group(self, ctx):
         # Check if this was invoked from a DM or a guild
         if isinstance(ctx.channel, discord.DMChannel):  # DM
             db = mysql()
@@ -128,8 +129,48 @@ subcommands that are below.",
                 f"{ctx.channel.id},{message.id},{expire_time}",
                 0
             )
+
         else:  # If it's anything else... just make like nothing happened
             return
+
+    @nest_group.command(
+        name="add",
+        aliases=["a"],
+        brief="Nest System",
+        description="Cherubi Bot - Nest Management System",
+        usage="<add> <\"name of the nest\"> [latitude] [longitude]",
+        help="You can run the command without a tagged user to bring up your \
+info, tag a user to bring up theirs, or run one of the \
+subcommands that are below.",
+        invoke_without_command=True
+    )
+    @commands.check_any(
+        commands.is_owner(),
+        is_guild_owner(),
+        commands.has_role("Admin"),
+        commands.has_role("Nest"),
+        commands.has_role("Owner"),
+        commands.has_role("Staff"),
+        commands.has_role("Tech")
+    )
+    @commands.guild_only()
+    async def nest_add_subcommand(self, ctx, name, latitude: Optional[str], longitude: Optional[str]):
+        db = mysql()
+        query = """
+            INSERT INTO nests (guild, name, latitude, longitude, added)
+            VALUES (%s, %s, %s, %s, NOW())
+            ON DUPLICATE KEY UPDATE
+                latitude = VALUES(latitude),
+                longitude = VALUES(longitude),
+                added = VALUES(added);
+        """
+        db.execute(query, [
+            ctx.message.guild.id,
+            name,
+            None,  # WIP: Latitude
+            None  # WIP: Longitude
+        ])
+        db.close()
 
 
 def setup(client):
