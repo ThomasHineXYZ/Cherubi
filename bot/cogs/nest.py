@@ -99,7 +99,7 @@ class Nest(commands.Cog):
             if not results[0]['nest_channel']:
                 delete_delay = 60
                 message = await ctx.send(embed=lib.embedder.make_embed(
-                    type="info",
+                    type="error",
                     title=f"Nest's for {ctx.guild}",
                     content=f"Please contact the server owner to set up Cherubi's nest system",
                     footer=f"This message will self-destruct in {delete_delay} seconds"
@@ -136,13 +136,10 @@ class Nest(commands.Cog):
     @nest_group.command(
         name="add",
         aliases=["a"],
-        brief="Nest System",
+        brief="Add a nest to your server",
         description="Cherubi Bot - Nest Management System",
         usage="<add> <\"name of the nest\"> [latitude] [longitude]",
-        help="You can run the command without a tagged user to bring up your \
-info, tag a user to bring up theirs, or run one of the \
-subcommands that are below.",
-        invoke_without_command=True
+        help="Adds a nest location to your server. You can provide GPS coordinates if you'd like",  # WIP latitude longitude
     )
     @commands.check_any(
         commands.is_owner(),
@@ -155,14 +152,54 @@ subcommands that are below.",
     )
     @commands.guild_only()
     async def nest_add_subcommand(self, ctx, name, latitude: Optional[str], longitude: Optional[str]):
+        # Remove any accidental whitespace at the beginning or end of the name
+        name = name.strip()
+
+        # Do checks on the name
+        # Check if the name is either blank or empty
+        if len(name) == 0 or not name:
+            delete_delay = 60
+            message = await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title=f"Nest's for {ctx.guild}",
+                content=f"You need to provide a valid, and not blank, name for the nest.",
+                footer=f"This message will self-destruct in {delete_delay} seconds"
+            ), delete_after=delete_delay)
+
+            expire_time = datetime.now() + timedelta(seconds=delete_delay)
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id},{expire_time}",
+                0
+            )
+            return
+
+        # Check if the name of the nest is over the alloted 32 characters
+        if len(name) > 32:
+            delete_delay = 60
+            message = await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title=f"Nest's for {ctx.guild}",
+                content=f"The name for the nest is over the 32 character limit.\nIt was {len(name)} characters long.",
+                footer=f"This message will self-destruct in {delete_delay} seconds"
+            ), delete_after=delete_delay)
+
+            expire_time = datetime.now() + timedelta(seconds=delete_delay)
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id},{expire_time}",
+                0
+            )
+            return
+
         db = mysql()
         query = """
             INSERT INTO nests (guild, name, latitude, longitude, added)
             VALUES (%s, %s, %s, %s, NOW())
             ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
                 latitude = VALUES(latitude),
-                longitude = VALUES(longitude),
-                added = VALUES(added);
+                longitude = VALUES(longitude);
         """
         db.execute(query, [
             ctx.message.guild.id,
@@ -171,6 +208,21 @@ subcommands that are below.",
             None  # WIP: Longitude
         ])
         db.close()
+
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
+            type="info",
+            title=f"Nest's for {ctx.guild}",
+            content=f"Added `{name}` to your server's nests",
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
 
 def setup(client):
