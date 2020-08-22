@@ -78,10 +78,6 @@ Arguments within \[ \] are optional.
 | **!userinfo**                   | _Server Owner_ | Gives some stats for a tagged user.                   |
 
 ### Miscellaneous Commands
-| Command               | Requirements | Description                                |
-| --------              | :----------: | -----------                                |
-| **!help** \[command\] | -            | Shows bot/command help, with descriptions. |
-| **!ping**             | -            | Runs a heartbeat check on the bot. PONG!   |
 | Command                | Requirements    | Description                                                                                    |
 | --------               | :-------------: | ------------                                                                                   |
 | **!b** \[message\]     | -               | Translates to a [B-Button message](https://knowyourmeme.com/memes/b-button-emoji-%F0%9F%85%B1) |
