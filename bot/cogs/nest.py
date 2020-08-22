@@ -85,7 +85,7 @@ class Nest(commands.Cog):
             pass  # WIP
 
         elif isinstance(ctx.channel, discord.TextChannel):  # Guild
-            # Grab the guild's channel ID
+            # Grab the guild's nest channel ID
             db = mysql()
             query = """
                 SELECT
@@ -139,7 +139,8 @@ class Nest(commands.Cog):
         brief="Add a nest to your server",
         description="Cherubi Bot - Nest Management System",
         usage="<add> <\"name of the nest\"> [latitude] [longitude]",
-        help="Adds a nest location to your server. You can provide GPS coordinates if you'd like",  # WIP latitude longitude
+        help="Adds a nest location to your server. You can provide GPS coordinates if you'd like"
+            # WIP latitude longitude
     )
     @commands.check_any(
         commands.is_owner(),
@@ -152,6 +153,35 @@ class Nest(commands.Cog):
     )
     @commands.guild_only()
     async def nest_add_subcommand(self, ctx, name, latitude: Optional[str], longitude: Optional[str]):
+        # Grab the guild's nest channel ID
+        db = mysql()
+        query = """
+            SELECT
+                nest_channel
+            FROM guild_preferences
+            WHERE guild = %s;
+        """
+        results = db.query(query, [ctx.guild.id])
+        db.close()
+
+        # Check if the nests channel is even set. If not, then error out and tell the user to set the nests channel
+        if not results[0]['nest_channel']:
+            delete_delay = 60
+            message = await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title=f"Nest's for {ctx.guild}",
+                content=f"Set the nests channel by running `{ctx.prefix}nest setchannel` in your desired channel.",
+                footer=f"This message will self-destruct in {delete_delay} seconds"
+            ), delete_after=delete_delay)
+
+            expire_time = datetime.now() + timedelta(seconds=delete_delay)
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id},{expire_time}",
+                0
+            )
+            return
+
         # Remove any accidental whitespace at the beginning or end of the name
         name = name.strip()
 
@@ -204,7 +234,7 @@ class Nest(commands.Cog):
         db.execute(query, [
             ctx.message.guild.id,
             name,
-            None,  # WIP: Latitude
+            None,  # WIP: Latitude: https://en.wikipedia.org/wiki/ISO_6709
             None  # WIP: Longitude
         ])
         db.close()
@@ -214,6 +244,74 @@ class Nest(commands.Cog):
             type="info",
             title=f"Nest's for {ctx.guild}",
             content=f"Added `{name}` to your server's nests",
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
+
+    @nest_group.command(
+        name="list",
+        aliases=["l"],
+        brief="Add a nest to your server",
+        description="Cherubi Bot - Nest Management System",
+        help="Lists the nests for your server"
+    )
+    @commands.check_any(
+        commands.is_owner(),
+        is_guild_owner(),
+        commands.has_role("Admin"),
+        commands.has_role("Nest"),
+        commands.has_role("Owner"),
+        commands.has_role("Staff"),
+        commands.has_role("Tech")
+    )
+    @commands.guild_only()
+    async def nest_list_subcommand(self, ctx):
+        db = mysql()
+        query = """
+            SELECT
+                nest.name AS 'name',
+                nest.latitude AS 'latitude',
+                nest.longitude AS 'longitude',
+                nest.added AS 'added'
+                # pkmnname.english AS pokemon_name
+            FROM nests nest
+            # LEFT JOIN pokemon_names pkmnname ON pkmnname.dex = nest.dex
+            WHERE guild = %s;
+        """
+        results = db.query(query, [ctx.guild.id])
+        db.close()
+
+        fields = []
+        for result in results:
+            data = ""
+            if result['latitude']:
+                data += "\n" + "**Latitude**: " + result['latitude']
+
+            if result['longitude']:
+                data += "\n" + "**Longitude**: " + result['longitude']
+
+            data += "\n" + "**Added**: " + str(result['added'])
+
+            # data += "\n" + "**Pokémon:**: " + str(result['pokemon_name'])  # WIP
+
+            fields.append((result['name'], data, True))
+
+        fields.append(lib.embedder.separator)
+
+        fields.append(["Number of Nests:", len(results), True])
+
+        delete_delay = 60
+        message = await ctx.send(embed=lib.embedder.make_embed(
+            type="info",
+            title=f"Nest's for {ctx.guild}",
+            content=f"Here are the list of nests that are on your server currently:",
+            fields=fields,
             footer=f"This message will self-destruct in {delete_delay} seconds"
         ), delete_after=delete_delay)
 
