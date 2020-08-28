@@ -278,10 +278,12 @@ class Nest(commands.Cog):
                 nest.name AS 'name',
                 nest.latitude AS 'latitude',
                 nest.longitude AS 'longitude',
-                nest.added AS 'added'
-                # pkmnname.english AS pokemon_name
+                nest.added AS 'added',
+                pkmnname.english AS pokemon_name,
+                nest.reported_by AS reported_by,
+                nest.reported AS reported
             FROM nests nest
-            # LEFT JOIN pokemon_names pkmnname ON pkmnname.dex = nest.dex
+            LEFT JOIN pokemon_names pkmnname ON pkmnname.dex = nest.pokemon
             WHERE guild = %s;
         """
         results = db.query(query, [ctx.guild.id])
@@ -290,17 +292,42 @@ class Nest(commands.Cog):
         fields = []
         for result in results:
             data = ""
+            # If a latitude is set, add it
             if result['latitude']:
                 data += "\n" + "**Latitude**: " + result['latitude']
 
+            # If a longitude is set, add it
             if result['longitude']:
                 data += "\n" + "**Longitude**: " + result['longitude']
 
+            # Add in the added date
             data += "\n" + "**Added**: " + str(result['added'])
 
-            # data += "\n" + "**Pokémon:**: " + str(result['pokemon_name'])  # WIP
+            # If a Pokemon was reported, add in the Pokemon's name
+            if result['pokemon_name']:
+                data += "\n" + "**Pokémon:**: " + str(result['pokemon_name'])
 
-            fields.append((result['name'], data, True))
+            # Add in the person's nickname, username, or ID if there was a
+            # Pokemon that got reported for that nest
+            if result['reported_by']:
+                # This is here in case someone reported a nest and then left the
+                # guild
+                if ctx.guild.get_member(result['reported_by']):
+                    data += "\n" + "**Reported By (name)**: " + \
+                        str(ctx.guild.get_member(result['reported_by']).display_name)
+
+                elif self.client.get_user(result['reported_by']):
+                    data += "\n" + "**Reported By (name)**: " + \
+                        str(self.client.get_user(result['reported_by']))
+
+                else:
+                    data += "\n" + "**Reported By (id):**: " + str(result['reported_by'])
+
+            # Put in the datetime for when the nest got a report
+            if result['reported']:
+                data += "\n" + "**Reported:**: " + str(result['reported'])
+
+            fields.append((f"__{result['name']}__", data, True))
 
         fields.append(lib.embedder.separator)
 
