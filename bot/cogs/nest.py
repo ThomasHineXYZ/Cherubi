@@ -25,6 +25,24 @@ class Nest(commands.Cog):
                 ctx.guild.owner_id == ctx.author.id
         return commands.check(predicate)
 
+    def generate_image_link(self, dex):
+        # Base url for the repo, plus an image cacher link, if we are using it
+        base_url = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/"
+
+        url = base_url
+        url += "pokemon_icon_"
+
+        # Give it some leading zeroes
+        dex = str(dex).zfill(3)
+
+        # Assume the variant of it is '00' since it really doesn't matter
+        url += f"{dex}_00"
+
+        # Finally, add in the file extension
+        url += ".png"
+
+        return url
+
     def get_nest_info(self, guild_id, location):
         db = mysql()
         query = """
@@ -363,7 +381,7 @@ class Nest(commands.Cog):
                         str(ctx.guild.get_member(result['reported_by']).display_name)
 
                 elif self.client.get_user(result['reported_by']):
-                    data += "\n" + "**Reported By (name)**: " + \
+                    data += "\n" + "**Reported By (username)**: " + \
                         str(self.client.get_user(result['reported_by']))
 
                 else:
@@ -404,15 +422,16 @@ class Nest(commands.Cog):
     )
     @commands.guild_only()
     async def nest_report_subcommand(self, ctx, *args):
-        # await ctx.message.delete()  # disabled for now
+        await ctx.message.delete()  # disabled for now
 
-        arguments = list(args)  # NOTE for testing
-        await ctx.send(args)  # NOTE for testing
-        await ctx.send(arguments)  # NOTE for testing
+        # Convert the tuple of arguments in to a much nicer list
+        arguments = list(args)
 
+        # Search for the Pokemon using the first value that was given
         results_pokemon = self.get_pokemon_data(arguments[0])
 
-        # If nothing was returned, try using the last given value _just in case_
+        # If something was returned, remove it from the list.
+        # If nothing was returned, try using the last given value just in case.
         if results_pokemon:
             arguments.remove(arguments[0])
         else:
@@ -421,6 +440,7 @@ class Nest(commands.Cog):
             if results_pokemon:
                 arguments.remove(arguments[-1])
 
+        # If nothing is still returned, tell the user they didn't give a valid Pokemon
         if not results_pokemon:
             delete_delay = 120
             message = await ctx.send(embed=lib.embedder.make_embed(
@@ -438,32 +458,32 @@ class Nest(commands.Cog):
             )
             return
 
+        # Join the remaining arguments together for use as the location
         location = " ".join(arguments)
-        print(location)
 
+        # Find the nest using the location given
         results_location = self.get_nest_info(ctx.guild.id, location)
 
         # If it failed to find one and there's an ampersand in the location
-        # string, replace it with the word and and try again
+        # string, replace it with the word 'and' and try again
         if not results_location and " & " in location:
             location = location.replace(" & ", " and ")
-            print(location)
 
             results_location = self.get_nest_info(ctx.guild.id, location)
 
         # Now the opposite, just in case
         if not results_location and " and " in location:
             location = location.replace(" and ", " & ")
-            print(location)
 
             results_location = self.get_nest_info(ctx.guild.id, location)
 
+        # If there still is no returned value, tell the user the location wasn't valid
         if not results_location:
             delete_delay = 120
             message = await ctx.send(embed=lib.embedder.make_embed(
                 type="error",
                 title=f"Nest's for {ctx.guild}",
-                content=f"No valid nest location was given.",
+                content="No valid nest location was given.",
                 footer=f"This message will self-destruct in {delete_delay} seconds"
             ), delete_after=delete_delay)
 
@@ -473,8 +493,36 @@ class Nest(commands.Cog):
                 f"{ctx.channel.id},{message.id},{expire_time}",
                 0
             )
+            return
 
-        await ctx.send(f"Reported `{results_pokemon[0]['name']}` at `{results_location[0]['name']}`")
+        # Add in the new report
+        db = mysql()
+        query = """
+            UPDATE nests
+            SET pokemon = %s,
+                reported_by = %s,
+                reported = NOW()
+            WHERE guild = %s
+            AND name = %s;
+        """
+        db.execute(query, [results_pokemon[0]['dex'], ctx.author.id, ctx.guild.id, results_location[0]['name']])
+        db.close()
+
+        delete_delay = 120
+        message = await ctx.send(embed=lib.embedder.make_embed(
+            type="success",
+            title=f"Nest's for {ctx.guild}",
+            content=f"Reported `{results_pokemon[0]['name']}` at `{results_location[0]['name']}`",
+            thumbnail=self.generate_image_link(results_pokemon[0]['dex']),
+            footer=f"This message will self-destruct in {delete_delay} seconds"
+        ), delete_after=delete_delay)
+
+        expire_time = datetime.now() + timedelta(seconds=delete_delay)
+        self.temp_redis.set(
+            str(uuid.uuid4()),
+            f"{ctx.channel.id},{message.id},{expire_time}",
+            0
+        )
 
 
 def setup(client):
