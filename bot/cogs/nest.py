@@ -25,6 +25,52 @@ class Nest(commands.Cog):
                 ctx.guild.owner_id == ctx.author.id
         return commands.check(predicate)
 
+    def get_nest_info(self, guild_id, location):
+        db = mysql()
+        query = """
+            SELECT
+                name,
+                added
+            FROM nests
+            WHERE guild = %s
+                AND name = %s
+            LIMIT 1;
+        """
+        db.execute(query, [guild_id, location])
+        results = db.fetchall()
+        db.close()
+
+        return results
+
+    def get_pokemon_data(self, input):
+        db = mysql()
+        query = """
+            SELECT
+                pkmn.dex AS 'dex',
+                name.english AS 'name'
+            FROM pokemon pkmn
+            LEFT JOIN pokemon_names name on name.dex = pkmn.dex
+            WHERE (
+                pkmn.dex = %s OR
+                name.chinese = %s OR
+                name.english = %s OR
+                name.french = %s OR
+                name.german = %s OR
+                name.italian = %s OR
+                name.japanese = %s OR
+                name.korean = %s OR
+                name.portuguese = %s OR
+                name.spanish = %s OR
+                name.thai = %s
+            )
+            LIMIT 1;
+        """
+        db.execute(query, [input, input, input, input, input, input, input, input, input, input, input])
+        results = db.fetchall()
+        db.close()
+
+        return results
+
     @commands.group(
         name="nest",
         brief="Nest System",
@@ -305,7 +351,7 @@ class Nest(commands.Cog):
 
             # If a Pokemon was reported, add in the Pokemon's name
             if result['pokemon_name']:
-                data += "\n" + "**Pokémon:**: " + str(result['pokemon_name'])
+                data += "\n" + "**Pokémon**: " + str(result['pokemon_name'])
 
             # Add in the person's nickname, username, or ID if there was a
             # Pokemon that got reported for that nest
@@ -321,11 +367,11 @@ class Nest(commands.Cog):
                         str(self.client.get_user(result['reported_by']))
 
                 else:
-                    data += "\n" + "**Reported By (id):**: " + str(result['reported_by'])
+                    data += "\n" + "**Reported By (id)**: " + str(result['reported_by'])
 
             # Put in the datetime for when the nest got a report
             if result['reported']:
-                data += "\n" + "**Reported:**: " + str(result['reported'])
+                data += "\n" + "**Reported**: " + str(result['reported'])
 
             fields.append((f"__{result['name']}__", data, True))
 
@@ -348,6 +394,87 @@ class Nest(commands.Cog):
             f"{ctx.channel.id},{message.id},{expire_time}",
             0
         )
+
+    @nest_group.command(
+        name="report",
+        aliases=["r"],
+        brief="Reports a Pokémon in a nest for your server",
+        description="Cherubi Bot - Nest Management System",
+        help="Reports a nested Pokémon for your server"
+    )
+    @commands.guild_only()
+    async def nest_report_subcommand(self, ctx, *args):
+        # await ctx.message.delete()  # disabled for now
+
+        arguments = list(args)  # NOTE for testing
+        await ctx.send(args)  # NOTE for testing
+        await ctx.send(arguments)  # NOTE for testing
+
+        results_pokemon = self.get_pokemon_data(arguments[0])
+
+        # If nothing was returned, try using the last given value _just in case_
+        if results_pokemon:
+            arguments.remove(arguments[0])
+        else:
+            results_pokemon = self.get_pokemon_data(arguments[-1])
+            # If data was returned, remove the last argument
+            if results_pokemon:
+                arguments.remove(arguments[-1])
+
+        if not results_pokemon:
+            delete_delay = 120
+            message = await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title=f"Nest's for {ctx.guild}",
+                content=f"No valid Pokemon was given.",
+                footer=f"This message will self-destruct in {delete_delay} seconds"
+            ), delete_after=delete_delay)
+
+            expire_time = datetime.now() + timedelta(seconds=delete_delay)
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id},{expire_time}",
+                0
+            )
+            return
+
+        location = " ".join(arguments)
+        print(location)
+
+        results_location = self.get_nest_info(ctx.guild.id, location)
+
+        # If it failed to find one and there's an ampersand in the location
+        # string, replace it with the word and and try again
+        if not results_location and " & " in location:
+            location = location.replace(" & ", " and ")
+            print(location)
+
+            results_location = self.get_nest_info(ctx.guild.id, location)
+
+        # Now the opposite, just in case
+        if not results_location and " and " in location:
+            location = location.replace(" and ", " & ")
+            print(location)
+
+            results_location = self.get_nest_info(ctx.guild.id, location)
+
+        if not results_location:
+            delete_delay = 120
+            message = await ctx.send(embed=lib.embedder.make_embed(
+                type="error",
+                title=f"Nest's for {ctx.guild}",
+                content=f"No valid nest location was given.",
+                footer=f"This message will self-destruct in {delete_delay} seconds"
+            ), delete_after=delete_delay)
+
+            expire_time = datetime.now() + timedelta(seconds=delete_delay)
+            self.temp_redis.set(
+                str(uuid.uuid4()),
+                f"{ctx.channel.id},{message.id},{expire_time}",
+                0
+            )
+
+        await ctx.send(f"Reported `{results_pokemon[0]['name']}` at `{results_location[0]['name']}`")
 
 
 def setup(client):
