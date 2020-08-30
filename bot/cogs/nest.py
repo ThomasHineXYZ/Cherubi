@@ -422,7 +422,7 @@ class Nest(commands.Cog):
     )
     @commands.guild_only()
     async def nest_report_subcommand(self, ctx, *args):
-        await ctx.message.delete()  # disabled for now
+        await ctx.message.delete()
 
         # Convert the tuple of arguments in to a much nicer list
         arguments = list(args)
