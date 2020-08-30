@@ -1,18 +1,21 @@
 from discord.ext import commands, tasks
 from lib.mysql import mysql
 import github
-import discord
 import json
 import os
-import re
 import requests
 
 
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
         self.client = client
+        print("Loading pogoassets cog")
+
         self.load_data_from_github.start()
         self.github = github.Github(os.environ['GITHUB_ACCESS_TOKEN'])
+
+    def cog_unload(self):
+        print("Unloading pogoassets cog")
 
     def get_newest_commit_hash(self, repo):
         branch = repo.get_branch("master")
@@ -233,11 +236,13 @@ class PoGoAssets(commands.Cog):
         commit_hash = self.get_newest_commit_hash(repo)
         new_commit = self.check_commit_hash(commit_hash)
 
-        if not new_commit:  # NOTE This is hard set to false for testing
+        if new_commit:
+            # Iterate through the folders in the master branch of the repo
             for folder in repo.get_git_tree("master").tree:
+                # If it's the Images folder, then do things for images
                 if folder.path == "Images":
                     for subfolder in repo.get_git_tree(folder.sha).tree:
-                        # Store the images of the various Pokemon that are in the repo
+                        # Store the references of the various Pokemon that are in the repo
                         if subfolder.path == "Pokemon":
                             files = repo.get_git_tree(subfolder.sha).tree
                             self.store_pokemon_images(files)
