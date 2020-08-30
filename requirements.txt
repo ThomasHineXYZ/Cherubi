@@ -3,3 +3,4 @@ PyGitHub
 mysql-connector-python ~= 8.0.21
 python-dotenv == 0.14.0
 redis ~= 3.5.3
+texttable ~= 1.6.2
