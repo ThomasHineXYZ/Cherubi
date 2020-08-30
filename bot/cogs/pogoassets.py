@@ -7,6 +7,7 @@ import os
 import re
 import requests
 
+
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -49,7 +50,7 @@ class PoGoAssets(commands.Cog):
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE value = VALUES(value);
         """
-        results = db.execute(query, ['pogo_assets_commit_hash', hash])
+        db.execute(query, ['pogo_assets_commit_hash', hash])
         db.close()
 
     def store_pokemon_images(self, files):
@@ -184,17 +185,18 @@ class PoGoAssets(commands.Cog):
 
     def import_language_files(self):
         # Import / Update the language files from the repo
+        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK"
         language_files = {
-            "chinese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_chinesetraditional.json",
-            "english": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_english.json",
-            "french": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_french.json",
-            "german": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_german.json",
-            "italian": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_italian.json",
-            "japanese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_japanese.json",
-            "korean": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_korean.json",
-            "portuguese": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_brazilianportuguese.json",
-            "spanish": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_spanish.json",
-            "thai": "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/i18n_thai.json"
+            "chinese": f"{language_file_location}/i18n_chinesetraditional.json",
+            "english": f"{language_file_location}/i18n_english.json",
+            "french": f"{language_file_location}/i18n_french.json",
+            "german": f"{language_file_location}/i18n_german.json",
+            "italian": f"{language_file_location}/i18n_italian.json",
+            "japanese": f"{language_file_location}/i18n_japanese.json",
+            "korean": f"{language_file_location}/i18n_korean.json",
+            "portuguese": f"{language_file_location}/i18n_brazilianportuguese.json",
+            "spanish": f"{language_file_location}/i18n_spanish.json",
+            "thai": f"{language_file_location}/i18n_thai.json"
         }
 
         # Open a connection to the database and set the query up
@@ -222,25 +224,24 @@ class PoGoAssets(commands.Cog):
                     dex = json_key[13:]
                     self.store_pokemon_name(db, dex, language, json_value)
 
-
         # Finally close the connection
         db.close()
 
-    @tasks.loop(hours = 12)
+    @tasks.loop(hours=12)
     async def load_data_from_github(self):
         repo = self.github.get_repo("PokeMiners/pogo_assets")
         commit_hash = self.get_newest_commit_hash(repo)
         new_commit = self.check_commit_hash(commit_hash)
 
-        if new_commit: # NOTE This is hard set to false for testing
-            # In case I need to get a different tree_id later:
-            # https://stackoverflow.com/questions/25022016/get-all-file-names-from-a-github-repo-through-the-github-api/61656698#61656698
-            # https://api.github.com/repos/PokeMiners/pogo_assets/git/trees/master?recursive=1
-
-            # Store the images of the various Pokemon that are in the repo
-            files = repo.get_git_tree("ace98ff9284529e67c1fa3d1548d953596254b6e").tree
-            self.store_pokemon_images(files)
-            self.store_commit_hash(commit_hash)
+        if not new_commit:  # NOTE This is hard set to false for testing
+            for folder in repo.get_git_tree("master").tree:
+                if folder.path == "Images":
+                    for subfolder in repo.get_git_tree(folder.sha).tree:
+                        # Store the images of the various Pokemon that are in the repo
+                        if subfolder.path == "Pokemon":
+                            files = repo.get_git_tree(subfolder.sha).tree
+                            self.store_pokemon_images(files)
+                            self.store_commit_hash(commit_hash)
 
             # Import the various language files in case there are any changes
             self.import_language_files()
@@ -254,6 +255,7 @@ class PoGoAssets(commands.Cog):
     @load_data_from_github.before_loop
     async def before_load_data_from_github(self):
         await self.client.wait_until_ready()
+
 
 def setup(client):
     client.add_cog(PoGoAssets(client))
