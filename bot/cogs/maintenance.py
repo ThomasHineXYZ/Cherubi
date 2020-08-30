@@ -25,11 +25,68 @@ class Maintenance(commands.Cog):
         print("Loading maintenance cog")
 
         self.temp_redis = Redis("temp_message")
+        self.missing_pokemon_form_names.start()
         self.temporary_messages.start()
 
     def cog_unload(self):
         print("Unloading maintenance cog")
+        self.missing_pokemon_form_names.stop()
         self.temporary_messages.stop()
+
+    @tasks.loop(hours=6)
+    async def missing_pokemon_form_names(self):
+        """Sends a DM when there are forms that need names
+
+        Creates a neat little ASCII table with the list of all of the Pokemon
+        that are needing names for their forms.
+        """
+        db = mysql()
+        query = """
+            SELECT pkmn.dex AS 'dex',
+                name.english AS 'english',
+                pkmn.type AS 'type',
+                pkmn.isotope AS 'isotope',
+                pkmn.filename AS 'filename'
+
+            FROM pokemon pkmn
+            LEFT JOIN pokemon_names name ON name.dex = pkmn.dex
+            LEFT JOIN pokemon_form_names form_name
+                ON form_name.dex = pkmn.dex
+                AND form_name.type = pkmn.type
+
+            WHERE pkmn.type != "00"
+            AND form_name.name IS NULL
+            AND pkmn.dex != 327;
+        """  # Ignore Spinda types, since they are dumb
+        results = db.query(query)
+        db.close()
+
+        # If no results were returned, just skip everything below
+        if not results:
+            return
+
+        # Set up and generate the ASCII table
+        table = Texttable()
+        table.header(results[0].keys())
+        for result in results:
+            table.add_row(result.values())
+
+        # Finally print out the table in a codeblock and DM it to me
+        owner_user = self.client.get_user(self.client.owner_id)
+        await owner_user.send(embed=lib.embedder.make_embed(
+            type="info",
+            title="Missing Pokemon Form Information",
+            content=f"```{table.draw()}```"
+        ))
+
+    @missing_pokemon_form_names.before_loop
+    async def before_missing_pokemon_form_names(self):
+        """Waits until the bot is ready
+
+        This just makes it so that the loop doesn't start until the bot is
+        completely ready to run
+        """
+        await self.client.wait_until_ready()
 
     @tasks.loop(seconds=60)
     async def temporary_messages(self):
@@ -95,45 +152,6 @@ class Maintenance(commands.Cog):
     async def after_temporary_messages(self):
         keys = self.temp_redis.keys()
         print(f"{len(keys)} temporary messages waiting for cleanup")
-
-    @commands.command()
-    @commands.is_owner()
-    async def missingform(self, ctx):
-        # Grab the list of Pokemon that need names for their forms
-        # (except Spinda...)
-        db = mysql()
-        query = """
-            SELECT pkmn.dex AS 'dex',
-                name.english AS 'english',
-                pkmn.type AS 'type',
-                pkmn.isotope AS 'isotope',
-                pkmn.filename AS 'filename'
-
-            FROM pokemon pkmn
-            LEFT JOIN pokemon_names name ON name.dex = pkmn.dex
-            LEFT JOIN pokemon_form_names form_name
-                ON form_name.dex = pkmn.dex
-                AND form_name.type = pkmn.type
-
-            WHERE pkmn.type != "00"
-            AND form_name.name IS NULL
-            AND pkmn.dex != 327;
-        """  # Ignore Spinda types, since they are dumb
-        results = db.query(query)
-        db.close()
-
-        # Set up and generate the ASCII table
-        table = Texttable()
-        table.header(["dex", "english", "type", "isotope", "filename"])
-        for result in results:
-            table.add_row(result.values())
-
-        # Finally print out the table in a codeblock
-        await ctx.send(embed=lib.embedder.make_embed(
-            type="info",
-            title="Missing Pokemon Form Information",
-            content=f"```{table.draw()}```"
-        ))
 
 
 def setup(client):
