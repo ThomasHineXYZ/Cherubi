@@ -1,7 +1,10 @@
 from datetime import datetime
 from discord.ext import commands, tasks
+from lib.mysql import mysql
 from lib.rediswrapper import Redis
+from texttable import Texttable
 import discord
+import lib.embedder
 
 
 class Maintenance(commands.Cog):
@@ -92,6 +95,45 @@ class Maintenance(commands.Cog):
     async def after_temporary_messages(self):
         keys = self.temp_redis.keys()
         print(f"{len(keys)} temporary messages waiting for cleanup")
+
+    @commands.command()
+    @commands.is_owner()
+    async def missingform(self, ctx):
+        # Grab the list of Pokemon that need names for their forms
+        # (except Spinda...)
+        db = mysql()
+        query = """
+            SELECT pkmn.dex AS 'dex',
+                name.english AS 'english',
+                pkmn.type AS 'type',
+                pkmn.isotope AS 'isotope',
+                pkmn.filename AS 'filename'
+
+            FROM pokemon pkmn
+            LEFT JOIN pokemon_names name ON name.dex = pkmn.dex
+            LEFT JOIN pokemon_form_names form_name
+                ON form_name.dex = pkmn.dex
+                AND form_name.type = pkmn.type
+
+            WHERE pkmn.type != "00"
+            AND form_name.name IS NULL
+            AND pkmn.dex != 327;
+        """  # Ignore Spinda types, since they are dumb
+        results = db.query(query)
+        db.close()
+
+        # Set up and generate the ASCII table
+        table = Texttable()
+        table.header(["dex", "english", "type", "isotope", "filename"])
+        for result in results:
+            table.add_row(result.values())
+
+        # Finally print out the table in a codeblock
+        await ctx.send(embed=lib.embedder.make_embed(
+            type="info",
+            title="Missing Pokemon Form Information",
+            content=f"```{table.draw()}```"
+        ))
 
 
 def setup(client):
