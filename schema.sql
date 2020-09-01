@@ -1,12 +1,12 @@
 /**
- * Whitelister schema
+ * Cherubi schema
  */
 
 -- Disable foreign key checks until all schema has been created.
 SET FOREIGN_KEY_CHECKS=0;
 
 CREATE TABLE `checks` (
-  `name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   `value` text COLLATE utf8mb4_unicode_ci NULL,
   PRIMARY KEY (`name`),
   UNIQUE KEY `name` (`name`)
@@ -41,6 +41,15 @@ CREATE TABLE `pokemon` (
   UNIQUE KEY `dex_type_isotope` (`dex`,`type`,`isotope`),
   KEY `dex` (`dex`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of the Pokemon currently programmed in to the game';
+
+CREATE TABLE `pokemon_form_names` (
+  `dex` int(4) unsigned NOT NULL,
+  `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(24) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`dex`,`type`),
+  UNIQUE KEY `dex_type` (`dex`,`type`),
+  KEY `dex_type_index` (`dex`,`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='The name for each of the Pokemon types';
 
 CREATE TABLE `pokemon_names` (
   `dex` int(4) unsigned NOT NULL COMMENT 'The Pokemons ID in the national dex',
