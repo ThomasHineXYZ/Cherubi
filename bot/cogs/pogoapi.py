@@ -15,47 +15,56 @@ class PoGoApi(commands.Cog):
         data = requests.get(f"https://pogoapi.net/api/{api}")
         return data.json()
 
-    def check_checksum(self, api, checksum):
+    def check_checksum(self, db, api, checksum):
         # Grab the current checksum that we have stored
-        db = mysql()
         query = """
             SELECT value
             FROM checks
             WHERE name = %s;
         """
         results = db.query(query, [f"pogoapi_{api}"])
-        db.close()
 
-        # If the value doesn't doesn't exist in the checks table, add it and say
-        # that its a new commit
+        # If the value doesn't doesn't exist in the checks table, assume it's
+        # new
         if len(results) == 0:
-            self.store_commit_hash(hash)
             return True
 
         # If the grabbed commit hash equals the one that we have stored, it's
         # not a new commit
-        if results[0]['value'] == hash:
+        if results[0]['value'] == checksum:
             return False
 
         # Otherwise just assume it's a new commit, it shouldn't hurt anything
         return True
 
-    def store_checksum(self, api, checksum):
-        db = mysql()
+    def store_checksum(self, db, api, checksum):
         query = """
             INSERT INTO checks (name, value)
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE value = VALUES(value);
         """
         db.execute(query, [f"pogoapi_{api}", checksum])
-        db.close()
 
     @commands.command()
     @commands.is_owner()
     async def pogoapi(self, ctx):
         values = self.load_api("v1/api_hashes.json")
+
+        # Set up MySQL. This way it is only a single commit to the server
+        db = mysql()
+
         for value in values:
-            self.store_checksum(value, values[value]['hash_sha256'])
+            new_data = self.check_checksum(db, value, values[value]['hash_sha256'])
+
+            # Check if it's something we want to import, then import it
+            if new_data and value == "mega_pokemon.json":
+                print("New data for: " + value)
+
+            # Store the new checksum
+            if new_data:
+                self.store_checksum(db, value, values[value]['hash_sha256'])
+
+        db.close()
 
 
 def setup(client):
