@@ -225,7 +225,11 @@ class PoGoAssets(commands.Cog):
                 # pokemon_name_0001
                 if json_key.startswith("pokemon_name_"):
                     dex = json_key[13:]
-                    self.store_pokemon_name(db, dex, language, json_value)
+                    if len(dex) == 4:
+                        self.store_pokemon_name(db, dex, language, json_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the mega name
 
         # Finally close the connection
         db.close()
