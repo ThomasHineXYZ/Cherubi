@@ -24,7 +24,7 @@ For setting up the MySQL / MariaDB privileges: `GRANT SELECT, INSERT, UPDATE, DE
 
 If you want to overwrite any of the default values (like `MYSQL_PORT`) in `.env` then copy the line and paste it in to your `.env.local` file.
 
-We're licensed under MIT
+We're licensed under MIT.
 
 ## Directions for using Cherubi:
 By default the command prefix for Cherubi is `!`, but this can be changed (as you'll see below) on a server-by-server basis. So keep that in mind when reading the list of commands below.<br/>
@@ -72,10 +72,14 @@ Arguments within \[ \] are optional.
 | **!userinfo**                   | _Server Owner_  | Gives some stats for a tagged user.                   |
 
 ### Miscellaneous Commands
-| Command               | Requirements    | Description                                |
-| --------              | :-------------: | ------------                               |
-| **!help** \[command\] | -               | Shows bot/command help, with descriptions. |
-| **!ping**             | -               | Runs a heartbeat check on the bot. PONG!   |
+| Command                | Requirements    | Description                                                                                    |
+| --------               | :-------------: | ------------                                                                                   |
+| **!b** \[message\]     | -               | Translates to a [B-Button message](https://knowyourmeme.com/memes/b-button-emoji-%F0%9F%85%B1) |
+| **!emoji** \[message\] | -               | Translates messages to emoji characters.                                                       |
+| **!f**                 | -               | [Let's get an `f` in chat.](https://knowyourmeme.com/memes/press-f-to-pay-respects)            |
+| **!help** \[command\]  | -               | Shows bot/command help, with descriptions.                                                     |
+| **!hi**                | -               | Why not say hi to Cherubi? She's friendly.                                                     |
+| **!ping**              | -               | Runs a heartbeat check on the bot. PONG!                                                       |
 
 ### Temporary / Test Commands
 These are commands that are currently implemented, but might change or be removed
