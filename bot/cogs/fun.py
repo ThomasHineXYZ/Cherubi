@@ -241,7 +241,79 @@ class Fun(commands.Cog):
 
             new_message += new_word + " "
 
-        # Send the new fancy message
+        # Strip out any leading or trailing whitespace, and then send the new
+        # fancy message
+        new_message = new_message.strip()
+        await ctx.send(new_message)
+
+    @commands.command(
+        name="emoji",
+        brief="Emoji Translator",
+        description="Cherubi Bot - Fun Stuff",
+        help="Turn either the previous message, or the given string, in to a just emoji characters.",
+    )
+    async def emoji_translator(self, ctx, *, input_message=""):
+        letters = {
+            "a": "🇦",
+            "b": "🇧",
+            "c": "🇨",
+            "d": "🇩",
+            "e": "🇪",
+            "f": "🇫",
+            "g": "🇬",
+            "h": "🇭",
+            "i": "🇮",
+            "j": "🇯",
+            "k": "🇰",
+            "l": "🇱",
+            "m": "🇲",
+            "n": "🇳",
+            "o": "🇴",
+            "p": "🇵",
+            "q": "🇶",
+            "r": "🇷",
+            "s": "🇸",
+            "t": "🇹",
+            "u": "🇺",
+            "v": "🇻",
+            "w": "🇼",
+            "x": "🇽",
+            "y": "🇾",
+            "z": "🇿",
+        }
+
+        # Get the last message
+        message = ""
+        if input_message:
+            message = input_message
+        else:
+            channel = self.client.get_channel(ctx.channel.id)
+            last_message = await channel.history(limit=2).flatten()
+            message = last_message[1].content
+
+        message_split = message.split(" ")
+
+        new_message = ""
+        for word in message_split:
+            new_word = ""
+            for letter in word:
+                if letter.lower() in letters:
+                    new_word += letters[letter.lower()] + " "
+                else:
+                    new_word += letter
+
+            new_word = new_word.strip()
+            new_message += new_word + u"\u0009"
+
+            # If the message is over 200 characters, then send it prematurely
+            if len(new_message) > 256:
+                new_message = new_message.strip()
+                await ctx.send(new_message)
+                new_message = ""
+
+        # Strip out any leading or trailing whitespace, and then send the new
+        # fancy message
+        new_message = new_message.strip()
         await ctx.send(new_message)
 
     @commands.command(
