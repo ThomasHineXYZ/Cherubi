@@ -210,6 +210,7 @@ class Fun(commands.Cog):
         description="Cherubi Bot - Fun Stuff",
         help="Turn either the previous message, or the given string, in to a B Button Emoji message.",
     )
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def b_button_translator(self, ctx, *, input_message=""):
         # This is just to allow it to be changed easily
         # It's the red B emoji
@@ -264,6 +265,7 @@ class Fun(commands.Cog):
         description="Cherubi Bot - Fun Stuff",
         help="Turn either the previous message, or the given string, in to a just emoji characters.",
     )
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def emoji_translator(self, ctx, *, input_message=""):
         # Dictionary of all of the letter emojis
         letters = {
