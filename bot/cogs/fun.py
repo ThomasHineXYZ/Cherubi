@@ -204,6 +204,55 @@ class Fun(commands.Cog):
     async def greetings_command(self, ctx):
         await ctx.send(random.choice(self.greetings))
 
+    @commands.command(
+        name="b",
+        brief="B Button Translator",
+        description="Cherubi Bot - Fun Stuff",
+        help="Turn either the previous message, or the given string, in to a B Button Emoji message.",
+    )
+    async def b_button_translator(self, ctx, *, input_message=""):
+        b_emoji = "🅱️"
+
+        # Get the last message
+        message = ""
+        if input_message:
+            message = input_message
+        else:
+            channel = self.client.get_channel(ctx.channel.id)
+            last_message = await channel.history(limit=2).flatten()
+            message = last_message[1].content
+
+        message_split = message.split(" ")
+
+        exception_words = {
+            "potato": f"{b_emoji}o{b_emoji}ato",
+            "potatoes": f"{b_emoji}o{b_emoji}atoes",
+        }
+
+        new_message = ""
+        for word in message_split:
+            new_word = ""
+            if len(word) < 2:
+                new_word = word
+            elif word.lower() in exception_words:
+                new_word = exception_words[word.lower()]
+            else:
+                new_word = b_emoji + word[1:]
+
+            new_message += new_word + " "
+
+        # Send the new fancy message
+        await ctx.send(new_message)
+
+    @commands.command(
+        name="f",
+        brief="Pay your respects",
+        description="Cherubi Bot - Fun Stuff",
+        help="Pay your respects by putting an \"f\" in chat.",
+    )
+    async def pay_respects(self, ctx):
+        await ctx.send(f"{ctx.author.display_name} has paid their respects.")
+
 
 def setup(client):
     client.add_cog(Fun(client))

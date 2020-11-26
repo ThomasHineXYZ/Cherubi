@@ -28,7 +28,8 @@ We're licensed under MIT
 
 ## Directions for using Cherubi:
 By default the command prefix for Cherubi is `!`, but this can be changed (as you'll see below) on a server-by-server basis. So keep that in mind when reading the list of commands below.<br/>
-For DMing the bot though, any of `!`, `.`, `?`, `$`, `%`, `:`, `;`, `>` will work as the command prefix. It is also set up that if no command prefix is given, then it'll still run the command (ex: `help` vs `!help`).
+For DMing the bot though, any of `!`, `.`, `?`, `$`, `%`, `:`, `;`, `>` will work as the command prefix. It is also set up that if no command prefix is given, then it'll still run the command (ex: `help` vs `!help`).<br/>
+If you run `!help` on a server where the command prefix isn't set as `!` then it'll show a message of how to run help. This is in case you forget what you set your command prefix as.<br/>
 
 Arguments within \< \> are required.<br/>
 Arguments within \[ \] are optional.
