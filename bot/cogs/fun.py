@@ -211,9 +211,12 @@ class Fun(commands.Cog):
         help="Turn either the previous message, or the given string, in to a B Button Emoji message.",
     )
     async def b_button_translator(self, ctx, *, input_message=""):
+        # This is just to allow it to be changed easily
+        # It's the red B emoji
         b_emoji = "🅱️"
 
-        # Get the last message
+        # Get the message. Either the previous one or the one that was passed
+        # to this
         message = ""
         if input_message:
             message = input_message
@@ -222,16 +225,22 @@ class Fun(commands.Cog):
             last_message = await channel.history(limit=2).flatten()
             message = last_message[1].content
 
+        # Split the message by spaces, so we get a list of words
         message_split = message.split(" ")
 
+        # These are just some exception words that have a special replacement
         exception_words = {
             "potato": f"{b_emoji}o{b_emoji}ato",
             "potatoes": f"{b_emoji}o{b_emoji}atoes",
         }
 
+        # For each word in the message, if it's not an exception word, replace
+        # the first character of it with the b emoji
         new_message = ""
         for word in message_split:
             new_word = ""
+            # If it's less than two characters, just in case, just skip the
+            # word and add it back
             if len(word) < 2:
                 new_word = word
             elif word.lower() in exception_words:
@@ -239,11 +248,14 @@ class Fun(commands.Cog):
             else:
                 new_word = b_emoji + word[1:]
 
+            # Add the new word together with the previous ones, and add a space
+            # so it formats nicely
             new_message += new_word + " "
 
-        # Strip out any leading or trailing whitespace, and then send the new
-        # fancy message
+        # Strip out any leading or trailing whitespace
         new_message = new_message.strip()
+
+        # aaaaaaand send it!
         await ctx.send(new_message)
 
     @commands.command(
@@ -253,6 +265,7 @@ class Fun(commands.Cog):
         help="Turn either the previous message, or the given string, in to a just emoji characters.",
     )
     async def emoji_translator(self, ctx, *, input_message=""):
+        # Dictionary of all of the letter emojis
         letters = {
             "a": "🇦",
             "b": "🇧",
@@ -282,7 +295,8 @@ class Fun(commands.Cog):
             "z": "🇿",
         }
 
-        # Get the last message
+        # Get the message. Either the previous one or the one that was passed
+        # to this
         message = ""
         if input_message:
             message = input_message
@@ -291,30 +305,39 @@ class Fun(commands.Cog):
             last_message = await channel.history(limit=2).flatten()
             message = last_message[1].content
 
+        # Split the message by spaces, so we get a list of words
         message_split = message.split(" ")
 
+        # Replace all of the letters in a word with their emoji version
         new_message = ""
         for word in message_split:
             new_word = ""
             for letter in word:
                 if letter.lower() in letters:
+                    # Put a space between them, otherwise they mess up in
+                    # Discord
                     new_word += letters[letter.lower()] + " "
                 else:
                     new_word += letter
 
+            # Remove any extra whitespace around the word, then add in a tab
+            # character so there is some spacing between words
             new_word = new_word.strip()
             new_message += new_word + u"\u0009"
 
-            # If the message is over 200 characters, then send it prematurely
+            # If the message is over 200 characters, then send what we have so
+            # far prematurely so it doesn't get cut off. Then empty out the
             if len(new_message) > 256:
                 new_message = new_message.strip()
                 await ctx.send(new_message)
                 new_message = ""
 
-        # Strip out any leading or trailing whitespace, and then send the new
-        # fancy message
+        # Strip out any leading or trailing whitespace
         new_message = new_message.strip()
-        await ctx.send(new_message)
+
+        # If there is anything left to send, then send it
+        if new_message:
+            await ctx.send(new_message)
 
     @commands.command(
         name="f",
