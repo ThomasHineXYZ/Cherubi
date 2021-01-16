@@ -188,7 +188,7 @@ class PoGoAssets(commands.Cog):
 
     def import_language_files(self):
         # Import / Update the language files from the repo
-        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK"
+        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/JSON"
         language_files = {
             "chinese": f"{language_file_location}/i18n_chinesetraditional.json",
             "english": f"{language_file_location}/i18n_english.json",
