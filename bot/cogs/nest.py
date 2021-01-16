@@ -342,13 +342,13 @@ class Nest(commands.Cog):
                 nest.name AS 'name',
                 nest.latitude AS 'latitude',
                 nest.longitude AS 'longitude',
-                nest.added AS 'added',
                 pkmnname.english AS pokemon_name,
                 nest.reported_by AS reported_by,
                 nest.reported AS reported
             FROM nests nest
             LEFT JOIN pokemon_names pkmnname ON pkmnname.dex = nest.pokemon
-            WHERE guild = %s;
+            WHERE guild = %s
+            ORDER BY nest.name;
         """
         results = db.query(query, [ctx.guild.id])
         db.close()
@@ -364,9 +364,6 @@ class Nest(commands.Cog):
             if result['longitude']:
                 data += "\n" + "**Longitude**: " + result['longitude']
 
-            # Add in the added date
-            data += "\n" + "**Added**: " + str(result['added'])
-
             # If a Pokemon was reported, add in the Pokemon's name
             if result['pokemon_name']:
                 data += "\n" + "**Pokémon**: " + str(result['pokemon_name'])
@@ -377,11 +374,11 @@ class Nest(commands.Cog):
                 # This is here in case someone reported a nest and then left the
                 # guild
                 if ctx.guild.get_member(result['reported_by']):
-                    data += "\n" + "**Reported By (name)**: " + \
+                    data += "\n" + "**Reported By**: " + \
                         str(ctx.guild.get_member(result['reported_by']).display_name)
 
                 elif self.client.get_user(result['reported_by']):
-                    data += "\n" + "**Reported By (username)**: " + \
+                    data += "\n" + "**Reported By**: " + \
                         str(self.client.get_user(result['reported_by']))
 
                 else:
@@ -390,6 +387,9 @@ class Nest(commands.Cog):
             # Put in the datetime for when the nest got a report
             if result['reported']:
                 data += "\n" + "**Reported**: " + str(result['reported'])
+
+            if not data:
+                data = u"\u200B"
 
             fields.append((f"__{result['name']}__", data, True))
 
