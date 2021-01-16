@@ -1,7 +1,6 @@
 from discord.ext import commands
 from dotenv import load_dotenv
 from lib.mysql import mysql
-from lib.rediswrapper import Redis
 from pathlib import Path
 import discord
 import os
@@ -18,6 +17,7 @@ local_env_path = Path('.') / local_env_file_name
 if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
+
 # Sets the guild preferences for the guilds
 def set_default_preferences(db, guild_id):
     query = """
@@ -26,17 +26,22 @@ def set_default_preferences(db, guild_id):
     """
     db.execute(query, [guild_id, os.environ['COMMAND_PREFIX']])
 
-# Set the prefixes for each of the guilds
-prefixes = {}
-def get_prefix(client, message):
-    # Link the prefixes variable in this function to the global one, so it
-    # all updates
-    global prefixes
 
+# Set the prefixes for each of the guilds in to a global variable
+prefixes = {}
+
+
+# This is used for the command_prefix for starting up the bot. It gets run
+# against any message that the bot can see to check if it was a command or not.
+def get_prefix(client, message):
     # If it is a DM from a user, use these. "" needs to be on the very end of
     # the previous prefixes won't work.
     if isinstance(message.channel, discord.DMChannel):
         return ("!", ".", "?", "$", "%", ":", ";", ">", "")
+
+    # Link the prefixes variable in this function to the global one, so it
+    # all updates
+    global prefixes
 
     # If their prefix isn't in the list for some reason, re-run
     if message.guild.id not in prefixes:
@@ -56,18 +61,27 @@ def get_prefix(client, message):
     # Return their prefix from the prefixes dictionary
     return commands.when_mentioned_or(*prefixes[message.guild.id])(client, message)
 
+
 def is_guild_owner():
     def predicate(ctx):
         return ctx.guild is not None and ctx.guild.owner_id == ctx.author.id
     return commands.check(predicate)
 
+
+# Set up intents
+intents = discord.Intents.default()
+intents.members = True
+intents.guilds = True
+
 # Start up the bot
 client = commands.Bot(
-    command_prefix = get_prefix,
-    description = "Cherubi Bot for Pokemon Go Servers",
-    owner_id = int(os.environ['BOT_AUTHOR']),
-    status = discord.Status.dnd
+    command_prefix=get_prefix,
+    description="Cherubi Bot for Pokemon Go Servers",
+    owner_id=int(os.environ['BOT_AUTHOR']),
+    status=discord.Status.dnd,
+    intents=intents
 )
+
 
 @client.event
 async def on_ready():
@@ -81,6 +95,7 @@ async def on_ready():
         await status.set_activity(f"listening your input. Helping ~{len(client.guilds)} servers and ~{len(client.users)} users.")
 
     print("Bot is ready.")
+
 
 @client.event
 async def on_command_error(ctx, exc):
@@ -111,6 +126,7 @@ async def on_command_error(ctx, exc):
     else:
         raise exc
 
+
 @client.event
 async def on_guild_join(guild):
     print(f"Joined guild: {guild.id} / {guild.name}")
@@ -118,6 +134,7 @@ async def on_guild_join(guild):
     db = mysql()
     set_default_preferences(db, guild.id)
     db.close()
+
 
 @client.event
 async def on_guild_remove(guild):
@@ -132,6 +149,7 @@ async def on_guild_remove(guild):
     db.execute(query, [guild.id])
     db.close()
 
+
 @client.event
 async def on_connect():
     db = mysql()
@@ -145,16 +163,19 @@ async def on_connect():
 
     print("Bot Connected")
 
+
 @client.event
 async def on_disconnect():
     print("Bot Disconnected")
 
+
 @client.command(
-    brief = "PONG!"
+    brief="PONG!"
 )
 @commands.cooldown(1, 10, commands.BucketType.guild)
 async def ping(ctx):
     await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
+
 
 @client.command()
 @commands.guild_only()
