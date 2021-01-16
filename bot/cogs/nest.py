@@ -149,7 +149,7 @@ class Nest(commands.Cog):
             pass  # WIP
 
         elif isinstance(ctx.channel, discord.TextChannel):  # Guild
-            # Grab the guild's channel ID
+            # Grab the guild's nest channel ID
             db = mysql()
             query = """
                 SELECT
