@@ -1,23 +1,21 @@
-from discord.ext import commands, tasks
+from discord.ext import commands
 from lib.mysql import mysql
-from datetime import datetime
-import discord
-import json
-import requests
+import lib.embedder
+
 
 class ShinyEmbed(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @commands.command(
-        brief = "Shows you a picture of the shiny Pokémon you give",
-        usage = "<pokemon>"
+        brief="Shows you a picture of the shiny Pokémon you give",
+        usage="<pokemon>"
     )
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def shinyembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:
-            #TODO make a selection for people to choose which one they mean
+            # TODO make a selection for people to choose which one they mean
             for result in results:
                 sprite = self.generate_sprite_link(result, True)
                 image = self.generate_image_link(result, True)
@@ -32,14 +30,14 @@ class ShinyEmbed(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(
-        brief = "Shows you a picture of the Pokémon you give",
-        usage = "<pokemon>"
+        brief="Shows you a picture of the Pokémon you give",
+        usage="<pokemon>"
     )
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def normalembed(self, ctx, *, input):
         results = self.get_pokemon_info(input)
         if len(results) > 1:
-            #TODO make a selection for people to choose which one they mean
+            # TODO make a selection for people to choose which one they mean
             for result in results:
                 sprite = self.generate_sprite_link(result)
                 image = self.generate_image_link(result)
@@ -63,9 +61,11 @@ class ShinyEmbed(commands.Cog):
                 pkmn.type AS 'type',
                 pkmn.isotope AS 'isotope',
                 pkmn.filename AS 'filename',
+                form.name AS 'form',
                 pkmn.shiny AS 'shiny'
             FROM pokemon pkmn
             LEFT JOIN pokemon_names name on name.dex = pkmn.dex
+            LEFT JOIN pokemon_form_names form on form.dex = pkmn.dex AND form.type = pkmn.type
             WHERE (
                 pkmn.dex = %s OR
                 name.chinese = %s OR
@@ -86,17 +86,16 @@ class ShinyEmbed(commands.Cog):
 
         return results
 
-    def generate_image_link(self, result, shiny = False):
+    def generate_image_link(self, result, shiny=False):
         # Base url for the repo, plus an image cacher link, if we are using it
         base_url = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Images/Pokemon/"
-        cache_link = "https://images.weserv.nl/?url="
 
         url = ""
         url += base_url
         url += "pokemon_icon_"
 
         # Checks if a unique file name exists for the Pokemon
-        if result['filename'] == None: # If no specific file name is given
+        if result['filename'] is None:  # If no specific file name is given
             # Give it some leading zeroes
             dex = str(result['dex']).zfill(3)
 
@@ -120,8 +119,9 @@ class ShinyEmbed(commands.Cog):
 
         return url
 
-    def generate_sprite_link(self, result, shiny = False):
-        # Base url for the repo, plus an image cacher link, if we are using it
+    def generate_sprite_link(self, result, shiny=False):
+        # Base url for the repo, plus an image cacher link so that the sprite
+        # is cropped and looks proper
         base_url = "https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/"
         cache_link = "https://images.weserv.nl/?trim=10&url="
 
@@ -134,7 +134,15 @@ class ShinyEmbed(commands.Cog):
         else:
             url += "regular/"
 
-        url += result['name'].lower()
+        # If there is a name there, use it. Otherwise just replace it with an
+        # unknown picture
+        if result['name']:
+            name = result['name'].lower()
+            name = name.replace(".", "")
+            name = name.replace(" ", "-")
+            url += name
+        else:
+            url = base_url + "unknown-gen5"
 
         # Finally, add in the file extension
         url += ".png"
@@ -144,26 +152,28 @@ class ShinyEmbed(commands.Cog):
     def generate_embed(self, ctx, sprite, image, result):
         # Cherubi green: 0x2FA439
         # Cherubi pink: 0xE66479
-        embed = discord.Embed(
-            title = f"{result['name']}",
-            description = f"National Dex #{str(result['dex']).zfill(3)}",
-            colour = 0x2FA439,
-            timestamp=datetime.utcnow()
+        fields = []
+
+        fields.append(["__Shiny Exists?__", bool(result['shiny']), True])
+        fields.append(lib.embedder.separator)
+        fields.append(["__Type__", result['type'] or u"\u200B", True])
+        fields.append(["__Isotope__", result['isotope'] or u"\u200B", True])
+        fields.append(["__Filename__", result['filename'] or u"\u200B", True])
+        fields.append(["__Form Name__", result['form'] or u"\u200B", True])
+
+        embed = lib.embedder.make_embed(
+            colour=0x2FA439,
+            title="Shiny Checker",
+            header=f"{result['name']}",
+            content=f"National Dex #{str(result['dex']).zfill(3)}",
+            icon=sprite,
+            fields=fields,
+            thumbnail=image,
+            footer=f"Generated by {ctx.author.display_name}"
         )
 
-        # Set the name as "Shiny Checker", for now. Also set the icon like the
-        # little in-game sprites from the main series games
-        embed.set_author(name="Shiny Checker", icon_url=sprite)
-        embed.set_thumbnail(url=image)
-
-        embed.add_field(name="Shiny Exists?", value=bool(result['shiny']), inline=True)
-
-        # if result[4]:
-        #     embed.add_field(name="Date Released:", value=result[4], inline=True)
-
-        embed.set_footer(text=f"Generated by {ctx.author.display_name}")
-
         return embed
+
 
 def setup(client):
     client.add_cog(ShinyEmbed(client))
