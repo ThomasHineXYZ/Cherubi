@@ -2,7 +2,7 @@ from datetime import datetime
 from discord.ext import commands, tasks
 from lib.mysql import mysql
 from lib.rediswrapper import Redis
-from texttable import Texttable
+from prettytable import PrettyTable
 import discord
 import lib.embedder
 
@@ -66,8 +66,8 @@ class Maintenance(commands.Cog):
             return
 
         # Set up and generate the ASCII table
-        table = Texttable()
-        table.header(results[0].keys())
+        table = PrettyTable()
+        table.field_names = results[0].keys()
         for result in results:
             table.add_row(result.values())
 
@@ -76,7 +76,7 @@ class Maintenance(commands.Cog):
         await owner_user.send(embed=lib.embedder.make_embed(
             type="info",
             title="Missing Pokemon Form Information",
-            content=f"```{table.draw()}```"
+            content=f"```{table}```"
         ))
 
     @missing_pokemon_form_names.before_loop
