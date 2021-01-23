@@ -58,6 +58,7 @@ class FancyEmbed(commands.Cog):
             SELECT
                 pkmn.dex AS 'dex',
                 name.english AS 'name',
+                category.english AS 'category',
                 pkmn.type AS 'type',
                 pkmn.isotope AS 'isotope',
                 pkmn.filename AS 'filename',
@@ -65,6 +66,7 @@ class FancyEmbed(commands.Cog):
                 pkmn.shiny AS 'shiny'
             FROM pokemon pkmn
             LEFT JOIN pokemon_names name on name.dex = pkmn.dex
+            LEFT JOIN pokemon_categories category on category.dex = pkmn.dex
             LEFT JOIN pokemon_form_names form on form.dex = pkmn.dex AND form.type = pkmn.type
             WHERE (
                 pkmn.dex = %s OR
@@ -154,8 +156,8 @@ class FancyEmbed(commands.Cog):
         # Cherubi pink: 0xE66479
         fields = []
 
-        fields.append(["__Shiny Exists?__", bool(result['shiny']), True])
-        fields.append(lib.embedder.separator)
+        fields.append(["__Category__", result['category'] or u"\u200B", False])
+        fields.append(["__Shiny Exists?__", bool(result['shiny']), False])
         fields.append(["__Type__", result['type'] or u"\u200B", True])
         fields.append(["__Isotope__", result['isotope'] or u"\u200B", True])
         fields.append(["__Filename__", result['filename'] or u"\u200B", True])
@@ -176,4 +178,4 @@ class FancyEmbed(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(ShinyEmbed(client))
+    client.add_cog(FancyEmbed(client))
