@@ -52,6 +52,7 @@ CREATE TABLE `pokemon_names` (
   `japanese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Japanese',
   `korean` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Korean',
   `portuguese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Portuguese',
+  `russian` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Russian',
   `spanish` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Spanish',
   `thai` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Thai',
   PRIMARY KEY (`dex`),
