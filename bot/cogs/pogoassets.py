@@ -174,36 +174,29 @@ class PoGoAssets(commands.Cog):
 
     def text_to_dictionary(self, dump):
         # Split it up by each line break, and then get the length
-        dump_split = dump.split("\n")
+        dump_split = dump.split("\r\n\r\n")
         dump_length = len(dump_split)
 
         iteration = 0  # The current iteration
-        skips = 3  # The amount of lines to skip
         file_dictionary = {}
         for iteration in range(dump_length):
-            # Breaks from the forloop if the iteration is at the end
-            if iteration + 3 > dump_length:
-                break
+            # Grab the first line. Then remove any unneeded line breaks, the
+            # leading bit of text, and clean up any leading/trailing whitespace
+            resource_id = dump_split[iteration].split("\r\n")[0]
+            resource_id = resource_id.replace("\n", "")
+            resource_id = resource_id.replace("RESOURCE ID:", "")
+            resource_id = resource_id.strip()
 
-            # Only run this every X amount of times
-            if iteration % skips == 0:
+            # Grab the remaining lines. Remove the leading bit of text, and clean up
+            # any leading/trailing whitespace
+            other_lines_split = dump_split[iteration].split("\r\n")[1:]
+            text_data = "\n".join(other_lines_split)
+            text_data = text_data.replace("TEXT:", "")
+            text_data = text_data.strip()
+            print(text_data)
 
-                # Grab the current line. Then remove any unneeded line breaks, the
-                # leading bit of text, and clean up any leading/trailing whitespace
-                line1 = dump_split[iteration]
-                line1 = line1.replace("\n", "")
-                line1 = line1.replace("RESOURCE ID:", "")
-                line1 = line1.strip()
-
-                # Grab the next line. Then remove any unneeded line breaks, the
-                # leading bit of text, and clean up any leading/trailing whitespace
-                line2 = dump_split[iteration + 1]
-                line2 = line2.replace("\n", "")
-                line2 = line2.replace("TEXT:", "")
-                line2 = line2.strip()
-
-                # Store it in the dictionary
-                file_dictionary[line1] = line2
+            # Store it in the dictionary
+            file_dictionary[resource_id] = text_data
 
         return file_dictionary
 
