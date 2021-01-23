@@ -126,6 +126,87 @@ class PoGoAssets(commands.Cog):
 
         return data
 
+    def import_language_files(self):
+        # Import / Update the language files from the repo
+        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/"
+        language_files = {
+            # "chinesetraditional": f"{language_file_location}/ChineseTraditional.txt",
+            "english": f"{language_file_location}/English.txt",
+            # "french": f"{language_file_location}/French.txt",
+            # "german": f"{language_file_location}/German.txt",
+            # "italian": f"{language_file_location}/Italian.txt",
+            # "japanese": f"{language_file_location}/Japanese.txt",
+            # "korean": f"{language_file_location}/Korean.txt",
+            # "portuguese": f"{language_file_location}/BrazilianPortuguese.txt",
+            # "russian": f"{language_file_location}/Russian.txt", # NOTE Add this to the schema
+            # "spanish": f"{language_file_location}/Spanish.txt",
+            # "thai": f"{language_file_location}/Thai.txt",
+        }
+
+        # Open a connection to the database and set the query up
+        db = mysql()
+
+        # Iterate through each of the language files that were given above
+        for language, language_file in language_files.items():
+            # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
+            # dictionary, since Niantic is dumb
+            data = requests.get(language_file).text
+
+            # Load the text file in to a dictionary
+            text_data = self.text_to_dictionary(data)
+            print(text_data)
+
+            # Iterate through the json_dictionary to find the values that we want
+            for resource_id, text_value in text_data.items():
+
+                # If it is a a Pokemon name
+                # pokemon_name_0001
+                if resource_id.startswith("pokemon_name_"):
+                    dex = resource_id[13:]
+                    if len(dex) == 4:
+                        self.store_pokemon_name(db, dex, language, text_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the mega name
+
+        # Finally close the connection
+        db.close()
+
+    def text_to_dictionary(self, dump):
+        # Split it up by each line break, and then get the length
+        dump_split = dump.split("\n")
+        dump_length = len(dump_split)
+
+        iteration = 0  # The current iteration
+        skips = 3  # The amount of lines to skip
+        file_dictionary = {}
+        for iteration in range(dump_length):
+            # Breaks from the forloop if the iteration is at the end
+            if iteration + 3 > dump_length:
+                break
+
+            # Only run this every X amount of times
+            if iteration % skips == 0:
+
+                # Grab the current line. Then remove any unneeded line breaks, the
+                # leading bit of text, and clean up any leading/trailing whitespace
+                line1 = dump_split[iteration]
+                line1 = line1.replace("\n", "")
+                line1 = line1.replace("RESOURCE ID:", "")
+                line1 = line1.strip()
+
+                # Grab the next line. Then remove any unneeded line breaks, the
+                # leading bit of text, and clean up any leading/trailing whitespace
+                line2 = dump_split[iteration + 1]
+                line2 = line2.replace("\n", "")
+                line2 = line2.replace("TEXT:", "")
+                line2 = line2.strip()
+
+                # Store it in the dictionary
+                file_dictionary[line1] = line2
+
+        return file_dictionary
+
     def store_pokemon_name(self, db, dex, language, name):
         # Create a language dictionary, setting everything as NULL to start.
         name_list = {
@@ -185,54 +266,6 @@ class PoGoAssets(commands.Cog):
             name_list['spanish'],
             name_list['thai'],
         ])
-
-    def import_language_files(self):
-        # Import / Update the language files from the repo
-        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/JSON"
-        language_files = {
-            "chinese": f"{language_file_location}/i18n_chinesetraditional.json",
-            "english": f"{language_file_location}/i18n_english.json",
-            "french": f"{language_file_location}/i18n_french.json",
-            "german": f"{language_file_location}/i18n_german.json",
-            "italian": f"{language_file_location}/i18n_italian.json",
-            "japanese": f"{language_file_location}/i18n_japanese.json",
-            "korean": f"{language_file_location}/i18n_korean.json",
-            "portuguese": f"{language_file_location}/i18n_brazilianportuguese.json",
-            "spanish": f"{language_file_location}/i18n_spanish.json",
-            "thai": f"{language_file_location}/i18n_thai.json"
-        }
-
-        # Open a connection to the database and set the query up
-        db = mysql()
-
-        # Iterate through each of the language files that were given above
-        for language, language_file in language_files.items():
-            # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
-            # dictionary, since Niantic is dumb
-            data = requests.get(language_file).text
-            dump = json.loads(data.encode('utf-8'))
-            json_dictionary = dict(
-                zip(
-                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 0],
-                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 1]
-                )
-            )
-
-            # Iterate through the json_dictionary to find the values that we want
-            for json_key, json_value in json_dictionary.items():
-
-                # If it is a a Pokemon name
-                # pokemon_name_0001
-                if json_key.startswith("pokemon_name_"):
-                    dex = json_key[13:]
-                    if len(dex) == 4:
-                        self.store_pokemon_name(db, dex, language, json_value)
-                    elif len(dex) == 9:
-                        dex = dex[:4]
-                        pass  # NOTE: Do something with the mega name
-
-        # Finally close the connection
-        db.close()
 
     @tasks.loop(hours=12)
     async def load_data_from_github(self):
