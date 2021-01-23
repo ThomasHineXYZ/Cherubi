@@ -155,7 +155,7 @@ class PoGoAssets(commands.Cog):
             # Load the text file in to a dictionary
             text_data = self.text_to_dictionary(data)
 
-            # Iterate through the json_dictionary to find the values that we want
+            # Iterate through the dictionary to find the values we want
             for resource_id, text_value in text_data.items():
                 # If it is a a Pokemon name
                 # pokemon_name_0001
@@ -166,6 +166,15 @@ class PoGoAssets(commands.Cog):
                     elif len(dex) == 9:
                         dex = dex[:4]
                         pass  # NOTE: Do something with the mega name
+                # If it is a a Pokemon's description
+                # pokemon_desc_0001
+                elif resource_id.startswith("pokemon_desc_"):
+                    dex = resource_id[13:]
+                    if len(dex) == 4:
+                        self.store_pokemon_descriptions(db, dex, language, text_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the different forms
 
         # Finally close the connection
         db.close()
@@ -227,6 +236,70 @@ class PoGoAssets(commands.Cog):
 
         query = """
             INSERT INTO pokemon_names (
+                dex,
+                chinese,
+                english,
+                french,
+                german,
+                italian,
+                japanese,
+                korean,
+                portuguese,
+                russian,
+                spanish,
+                thai
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                chinese = COALESCE(VALUES(chinese), chinese),
+                english = COALESCE(VALUES(english), english),
+                french = COALESCE(VALUES(french), french),
+                german = COALESCE(VALUES(german), german),
+                italian = COALESCE(VALUES(italian), italian),
+                japanese = COALESCE(VALUES(japanese), japanese),
+                korean = COALESCE(VALUES(korean), korean),
+                portuguese = COALESCE(VALUES(portuguese), portuguese),
+                russian = COALESCE(VALUES(russian), russian),
+                spanish = COALESCE(VALUES(spanish), spanish),
+                thai = COALESCE(VALUES(thai), thai);
+        """
+
+        db.execute(query, [
+            dex,
+            name_list['chinese'],
+            name_list['english'],
+            name_list['french'],
+            name_list['german'],
+            name_list['italian'],
+            name_list['japanese'],
+            name_list['korean'],
+            name_list['portuguese'],
+            name_list['russian'],
+            name_list['spanish'],
+            name_list['thai'],
+        ])
+
+    def store_pokemon_descriptions(self, db, dex, language, name):
+        # Create a language dictionary, setting everything as NULL to start.
+        name_list = {
+            "chinese": None,
+            "english": None,
+            "french": None,
+            "german": None,
+            "italian": None,
+            "japanese": None,
+            "korean": None,
+            "portuguese": None,
+            "russian": None,
+            "spanish": None,
+            "thai": None,
+        }
+
+        # Set the language that we worked on as the name we grabbed
+        name_list[language] = name
+
+        query = """
+            INSERT INTO pokemon_descriptions (
                 dex,
                 chinese,
                 english,
