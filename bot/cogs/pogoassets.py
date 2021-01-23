@@ -130,7 +130,7 @@ class PoGoAssets(commands.Cog):
         # Import / Update the language files from the repo
         text_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/"
         text_files = {
-            "chinesetraditional": f"{text_file_location}/ChineseTraditional.txt",
+            "chinese": f"{text_file_location}/ChineseTraditional.txt",
             "english": f"{text_file_location}/English.txt",
             "french": f"{text_file_location}/French.txt",
             "german": f"{text_file_location}/German.txt",
