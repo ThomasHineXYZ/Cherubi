@@ -126,39 +126,37 @@ class PoGoAssets(commands.Cog):
 
         return data
 
-    def import_language_files(self):
+    def import_text_files(self):
         # Import / Update the language files from the repo
-        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/"
-        language_files = {
-            # "chinesetraditional": f"{language_file_location}/ChineseTraditional.txt",
-            "english": f"{language_file_location}/English.txt",
-            # "french": f"{language_file_location}/French.txt",
-            # "german": f"{language_file_location}/German.txt",
-            # "italian": f"{language_file_location}/Italian.txt",
-            # "japanese": f"{language_file_location}/Japanese.txt",
-            # "korean": f"{language_file_location}/Korean.txt",
-            # "portuguese": f"{language_file_location}/BrazilianPortuguese.txt",
-            # "russian": f"{language_file_location}/Russian.txt", # NOTE Add this to the schema
-            # "spanish": f"{language_file_location}/Spanish.txt",
-            # "thai": f"{language_file_location}/Thai.txt",
+        text_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/"
+        text_files = {
+            "chinesetraditional": f"{text_file_location}/ChineseTraditional.txt",
+            "english": f"{text_file_location}/English.txt",
+            "french": f"{text_file_location}/French.txt",
+            "german": f"{text_file_location}/German.txt",
+            "italian": f"{text_file_location}/Italian.txt",
+            "japanese": f"{text_file_location}/Japanese.txt",
+            "korean": f"{text_file_location}/Korean.txt",
+            "portuguese": f"{text_file_location}/BrazilianPortuguese.txt",
+            "russian": f"{text_file_location}/Russian.txt",
+            "spanish": f"{text_file_location}/Spanish.txt",
+            "thai": f"{text_file_location}/Thai.txt",
         }
 
         # Open a connection to the database and set the query up
         db = mysql()
 
         # Iterate through each of the language files that were given above
-        for language, language_file in language_files.items():
+        for language, text_file in text_files.items():
             # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
             # dictionary, since Niantic is dumb
-            data = requests.get(language_file).text
+            data = requests.get(text_file).text
 
             # Load the text file in to a dictionary
             text_data = self.text_to_dictionary(data)
-            print(text_data)
 
             # Iterate through the json_dictionary to find the values that we want
             for resource_id, text_value in text_data.items():
-
                 # If it is a a Pokemon name
                 # pokemon_name_0001
                 if resource_id.startswith("pokemon_name_"):
@@ -219,6 +217,7 @@ class PoGoAssets(commands.Cog):
             "japanese": None,
             "korean": None,
             "portuguese": None,
+            "russian": None,
             "spanish": None,
             "thai": None,
         }
@@ -237,10 +236,11 @@ class PoGoAssets(commands.Cog):
                 japanese,
                 korean,
                 portuguese,
+                russian,
                 spanish,
                 thai
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 chinese = COALESCE(VALUES(chinese), chinese),
                 english = COALESCE(VALUES(english), english),
@@ -250,6 +250,7 @@ class PoGoAssets(commands.Cog):
                 japanese = COALESCE(VALUES(japanese), japanese),
                 korean = COALESCE(VALUES(korean), korean),
                 portuguese = COALESCE(VALUES(portuguese), portuguese),
+                russian = COALESCE(VALUES(russian), russian),
                 spanish = COALESCE(VALUES(spanish), spanish),
                 thai = COALESCE(VALUES(thai), thai);
         """
@@ -264,6 +265,7 @@ class PoGoAssets(commands.Cog):
             name_list['japanese'],
             name_list['korean'],
             name_list['portuguese'],
+            name_list['russian'],
             name_list['spanish'],
             name_list['thai'],
         ])
@@ -287,7 +289,7 @@ class PoGoAssets(commands.Cog):
                             self.store_commit_hash(commit_hash)
 
             # Import the various language files in case there are any changes
-            self.import_language_files()
+            self.import_text_files()
 
             print("New PokeMiners/pogo_assets commit!")
 
