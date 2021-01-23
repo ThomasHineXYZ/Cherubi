@@ -3,7 +3,7 @@ from lib.mysql import mysql
 import lib.embedder
 
 
-class ShinyEmbed(commands.Cog):
+class FancyEmbed(commands.Cog):
     def __init__(self, client):
         self.client = client
 
