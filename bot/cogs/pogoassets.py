@@ -173,8 +173,17 @@ class PoGoAssets(commands.Cog):
         db.close()
 
     def text_to_dictionary(self, dump):
+        # The different line ending types
+        UNIX_NEWLINE = '\n'
+        WINDOWS_NEWLINE = '\r\n'
+        MAC_NEWLINE = '\r'
+
+        # Convert them all to using Unix line endings
+        dump = dump.replace(WINDOWS_NEWLINE, UNIX_NEWLINE)
+        dump = dump.replace(MAC_NEWLINE, UNIX_NEWLINE)
+
         # Split it up by each line break, and then get the length
-        dump_split = dump.split("\r\n\r\n")
+        dump_split = dump.split("\n\n")
         dump_length = len(dump_split)
 
         iteration = 0  # The current iteration
@@ -182,18 +191,17 @@ class PoGoAssets(commands.Cog):
         for iteration in range(dump_length):
             # Grab the first line. Then remove any unneeded line breaks, the
             # leading bit of text, and clean up any leading/trailing whitespace
-            resource_id = dump_split[iteration].split("\r\n")[0]
+            resource_id = dump_split[iteration].split("\n")[0]
             resource_id = resource_id.replace("\n", "")
             resource_id = resource_id.replace("RESOURCE ID:", "")
             resource_id = resource_id.strip()
 
             # Grab the remaining lines. Remove the leading bit of text, and clean up
             # any leading/trailing whitespace
-            other_lines_split = dump_split[iteration].split("\r\n")[1:]
+            other_lines_split = dump_split[iteration].split("\n")[1:]
             text_data = "\n".join(other_lines_split)
             text_data = text_data.replace("TEXT:", "")
             text_data = text_data.strip()
-            print(text_data)
 
             # Store it in the dictionary
             file_dictionary[resource_id] = text_data
