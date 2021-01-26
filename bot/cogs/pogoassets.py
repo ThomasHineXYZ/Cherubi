@@ -192,13 +192,13 @@ class PoGoAssets(commands.Cog):
 
     def text_to_dictionary(self, dump):
         # The different line ending types
-        UNIX_NEWLINE = '\n'
-        WINDOWS_NEWLINE = '\r\n'
-        MAC_NEWLINE = '\r'
+        unix_newline = '\n'
+        windows_newline = '\r\n'
+        mac_newline = '\r'
 
         # Convert them all to using Unix line endings
-        dump = dump.replace(WINDOWS_NEWLINE, UNIX_NEWLINE)
-        dump = dump.replace(MAC_NEWLINE, UNIX_NEWLINE)
+        dump = dump.replace(windows_newline, unix_newline)
+        dump = dump.replace(mac_newline, unix_newline)
 
         # Split it up by each line break, and then get the length
         dump_split = dump.split("\n\n")
