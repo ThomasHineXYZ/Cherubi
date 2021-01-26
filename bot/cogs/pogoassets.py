@@ -126,6 +126,106 @@ class PoGoAssets(commands.Cog):
 
         return data
 
+    def import_text_files(self):
+        # Import / Update the language files from the repo
+        text_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/"
+        text_files = {
+            "chinese": f"{text_file_location}/ChineseTraditional.txt",
+            "english": f"{text_file_location}/English.txt",
+            "french": f"{text_file_location}/French.txt",
+            "german": f"{text_file_location}/German.txt",
+            "italian": f"{text_file_location}/Italian.txt",
+            "japanese": f"{text_file_location}/Japanese.txt",
+            "korean": f"{text_file_location}/Korean.txt",
+            "portuguese": f"{text_file_location}/BrazilianPortuguese.txt",
+            "russian": f"{text_file_location}/Russian.txt",
+            "spanish": f"{text_file_location}/Spanish.txt",
+            "thai": f"{text_file_location}/Thai.txt",
+        }
+
+        # Open a connection to the database and set the query up
+        db = mysql()
+
+        # Iterate through each of the language files that were given above
+        for language, text_file in text_files.items():
+            # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
+            # dictionary, since Niantic is dumb
+            data = requests.get(text_file).text
+
+            # Load the text file in to a dictionary
+            text_data = self.text_to_dictionary(data)
+
+            # Iterate through the dictionary to find the values we want
+            for resource_id, text_value in text_data.items():
+                # If it is a a Pokemon name
+                # pokemon_name_0001
+                if resource_id.startswith("pokemon_name_"):
+                    dex = resource_id[13:]
+                    if len(dex) == 4:
+                        self.store_pokemon_name(db, dex, language, text_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the mega name
+
+                # If it is a a Pokemon's description
+                # pokemon_desc_0001
+                elif resource_id.startswith("pokemon_desc_"):
+                    dex = resource_id[13:]
+                    if len(dex) == 4:
+                        self.store_pokemon_descriptions(db, dex, language, text_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the different forms
+
+                # If it is a a Pokemon's description
+                # pokemon_category_0001
+                elif resource_id.startswith("pokemon_category_"):
+                    dex = resource_id[17:]
+                    if len(dex) == 4:
+                        self.store_pokemon_categories(db, dex, language, text_value)
+                    elif len(dex) == 9:
+                        dex = dex[:4]
+                        pass  # NOTE: Do something with the different forms
+
+        # Finally close the connection
+        db.close()
+
+    def text_to_dictionary(self, dump):
+        # The different line ending types
+        unix_newline = '\n'
+        windows_newline = '\r\n'
+        mac_newline = '\r'
+
+        # Convert them all to using Unix line endings
+        dump = dump.replace(windows_newline, unix_newline)
+        dump = dump.replace(mac_newline, unix_newline)
+
+        # Split it up by each line break, and then get the length
+        dump_split = dump.split("\n\n")
+        dump_length = len(dump_split)
+
+        iteration = 0  # The current iteration
+        file_dictionary = {}
+        for iteration in range(dump_length):
+            # Grab the first line. Then remove any unneeded line breaks, the
+            # leading bit of text, and clean up any leading/trailing whitespace
+            resource_id = dump_split[iteration].split("\n")[0]
+            resource_id = resource_id.replace("\n", "")
+            resource_id = resource_id.replace("RESOURCE ID:", "")
+            resource_id = resource_id.strip()
+
+            # Grab the remaining lines. Remove the leading bit of text, and clean up
+            # any leading/trailing whitespace
+            other_lines_split = dump_split[iteration].split("\n")[1:]
+            text_data = "\n".join(other_lines_split)
+            text_data = text_data.replace("TEXT:", "")
+            text_data = text_data.strip()
+
+            # Store it in the dictionary
+            file_dictionary[resource_id] = text_data
+
+        return file_dictionary
+
     def store_pokemon_name(self, db, dex, language, name):
         # Create a language dictionary, setting everything as NULL to start.
         name_list = {
@@ -137,6 +237,7 @@ class PoGoAssets(commands.Cog):
             "japanese": None,
             "korean": None,
             "portuguese": None,
+            "russian": None,
             "spanish": None,
             "thai": None,
         }
@@ -155,10 +256,11 @@ class PoGoAssets(commands.Cog):
                 japanese,
                 korean,
                 portuguese,
+                russian,
                 spanish,
                 thai
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 chinese = COALESCE(VALUES(chinese), chinese),
                 english = COALESCE(VALUES(english), english),
@@ -168,6 +270,7 @@ class PoGoAssets(commands.Cog):
                 japanese = COALESCE(VALUES(japanese), japanese),
                 korean = COALESCE(VALUES(korean), korean),
                 portuguese = COALESCE(VALUES(portuguese), portuguese),
+                russian = COALESCE(VALUES(russian), russian),
                 spanish = COALESCE(VALUES(spanish), spanish),
                 thai = COALESCE(VALUES(thai), thai);
         """
@@ -182,57 +285,138 @@ class PoGoAssets(commands.Cog):
             name_list['japanese'],
             name_list['korean'],
             name_list['portuguese'],
+            name_list['russian'],
             name_list['spanish'],
             name_list['thai'],
         ])
 
-    def import_language_files(self):
-        # Import / Update the language files from the repo
-        language_file_location = "https://raw.githubusercontent.com/PokeMiners/pogo_assets/master/Texts/Latest%20APK/JSON"
-        language_files = {
-            "chinese": f"{language_file_location}/i18n_chinesetraditional.json",
-            "english": f"{language_file_location}/i18n_english.json",
-            "french": f"{language_file_location}/i18n_french.json",
-            "german": f"{language_file_location}/i18n_german.json",
-            "italian": f"{language_file_location}/i18n_italian.json",
-            "japanese": f"{language_file_location}/i18n_japanese.json",
-            "korean": f"{language_file_location}/i18n_korean.json",
-            "portuguese": f"{language_file_location}/i18n_brazilianportuguese.json",
-            "spanish": f"{language_file_location}/i18n_spanish.json",
-            "thai": f"{language_file_location}/i18n_thai.json"
+    def store_pokemon_descriptions(self, db, dex, language, name):
+        # Create a language dictionary, setting everything as NULL to start.
+        name_list = {
+            "chinese": None,
+            "english": None,
+            "french": None,
+            "german": None,
+            "italian": None,
+            "japanese": None,
+            "korean": None,
+            "portuguese": None,
+            "russian": None,
+            "spanish": None,
+            "thai": None,
         }
 
-        # Open a connection to the database and set the query up
-        db = mysql()
+        # Set the language that we worked on as the name we grabbed
+        name_list[language] = name
 
-        # Iterate through each of the language files that were given above
-        for language, language_file in language_files.items():
-            # Grab the language file, load it as a JSON file, and then use dict and zip to put it in to a proper
-            # dictionary, since Niantic is dumb
-            data = requests.get(language_file).text
-            dump = json.loads(data.encode('utf-8'))
-            json_dictionary = dict(
-                zip(
-                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 0],
-                    [a for idx, a in enumerate(dump['data']) if idx % 2 == 1]
-                )
+        query = """
+            INSERT INTO pokemon_descriptions (
+                dex,
+                chinese,
+                english,
+                french,
+                german,
+                italian,
+                japanese,
+                korean,
+                portuguese,
+                russian,
+                spanish,
+                thai
             )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                chinese = COALESCE(VALUES(chinese), chinese),
+                english = COALESCE(VALUES(english), english),
+                french = COALESCE(VALUES(french), french),
+                german = COALESCE(VALUES(german), german),
+                italian = COALESCE(VALUES(italian), italian),
+                japanese = COALESCE(VALUES(japanese), japanese),
+                korean = COALESCE(VALUES(korean), korean),
+                portuguese = COALESCE(VALUES(portuguese), portuguese),
+                russian = COALESCE(VALUES(russian), russian),
+                spanish = COALESCE(VALUES(spanish), spanish),
+                thai = COALESCE(VALUES(thai), thai);
+        """
 
-            # Iterate through the json_dictionary to find the values that we want
-            for json_key, json_value in json_dictionary.items():
+        db.execute(query, [
+            dex,
+            name_list['chinese'],
+            name_list['english'],
+            name_list['french'],
+            name_list['german'],
+            name_list['italian'],
+            name_list['japanese'],
+            name_list['korean'],
+            name_list['portuguese'],
+            name_list['russian'],
+            name_list['spanish'],
+            name_list['thai'],
+        ])
 
-                # If it is a a Pokemon name
-                # pokemon_name_0001
-                if json_key.startswith("pokemon_name_"):
-                    dex = json_key[13:]
-                    if len(dex) == 4:
-                        self.store_pokemon_name(db, dex, language, json_value)
-                    elif len(dex) == 9:
-                        dex = dex[:4]
-                        pass  # NOTE: Do something with the mega name
+    def store_pokemon_categories(self, db, dex, language, name):
+        # Create a language dictionary, setting everything as NULL to start.
+        name_list = {
+            "chinese": None,
+            "english": None,
+            "french": None,
+            "german": None,
+            "italian": None,
+            "japanese": None,
+            "korean": None,
+            "portuguese": None,
+            "russian": None,
+            "spanish": None,
+            "thai": None,
+        }
 
-        # Finally close the connection
-        db.close()
+        # Set the language that we worked on as the name we grabbed
+        name_list[language] = name
+
+        query = """
+            INSERT INTO pokemon_categories (
+                dex,
+                chinese,
+                english,
+                french,
+                german,
+                italian,
+                japanese,
+                korean,
+                portuguese,
+                russian,
+                spanish,
+                thai
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                chinese = COALESCE(VALUES(chinese), chinese),
+                english = COALESCE(VALUES(english), english),
+                french = COALESCE(VALUES(french), french),
+                german = COALESCE(VALUES(german), german),
+                italian = COALESCE(VALUES(italian), italian),
+                japanese = COALESCE(VALUES(japanese), japanese),
+                korean = COALESCE(VALUES(korean), korean),
+                portuguese = COALESCE(VALUES(portuguese), portuguese),
+                russian = COALESCE(VALUES(russian), russian),
+                spanish = COALESCE(VALUES(spanish), spanish),
+                thai = COALESCE(VALUES(thai), thai);
+        """
+
+        db.execute(query, [
+            dex,
+            name_list['chinese'],
+            name_list['english'],
+            name_list['french'],
+            name_list['german'],
+            name_list['italian'],
+            name_list['japanese'],
+            name_list['korean'],
+            name_list['portuguese'],
+            name_list['russian'],
+            name_list['spanish'],
+            name_list['thai'],
+        ])
 
     @tasks.loop(hours=12)
     async def load_data_from_github(self):
@@ -253,7 +437,7 @@ class PoGoAssets(commands.Cog):
                             self.store_commit_hash(commit_hash)
 
             # Import the various language files in case there are any changes
-            self.import_language_files()
+            self.import_text_files()
 
             print("New PokeMiners/pogo_assets commit!")
 

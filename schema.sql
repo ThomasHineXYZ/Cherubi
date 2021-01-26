@@ -42,6 +42,42 @@ CREATE TABLE `pokemon` (
   KEY `dex` (`dex`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of the Pokemon currently programmed in to the game';
 
+CREATE TABLE `pokemon_categories` (
+  `dex` int(4) unsigned NOT NULL COMMENT 'The Pokemons ID in the national dex',
+  `chinese` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Chinese',
+  `english` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in English',
+  `french` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in French',
+  `german` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in German',
+  `italian` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Italian',
+  `japanese` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Japanese',
+  `korean` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Korean',
+  `portuguese` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Portuguese',
+  `russian` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Russian',
+  `spanish` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Spanish',
+  `thai` varchar(32) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons category in Thai',
+  PRIMARY KEY (`dex`),
+  UNIQUE KEY `dex` (`dex`),
+  KEY `dex_index` (`dex`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of the categories for the different Pokemon';
+
+CREATE TABLE `pokemon_descriptions` (
+  `dex` int(4) unsigned NOT NULL COMMENT 'The Pokemons ID in the national dex',
+  `chinese` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Chinese',
+  `english` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in English',
+  `french` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in French',
+  `german` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in German',
+  `italian` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Italian',
+  `japanese` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Japanese',
+  `korean` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Korean',
+  `portuguese` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Portuguese',
+  `russian` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Russian',
+  `spanish` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Spanish',
+  `thai` varchar(512) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons description in Thai',
+  PRIMARY KEY (`dex`),
+  UNIQUE KEY `dex` (`dex`),
+  KEY `dex_index` (`dex`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of the descriptions for the different Pokemon';
+
 CREATE TABLE `pokemon_names` (
   `dex` int(4) unsigned NOT NULL COMMENT 'The Pokemons ID in the national dex',
   `chinese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Chinese',
@@ -52,12 +88,13 @@ CREATE TABLE `pokemon_names` (
   `japanese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Japanese',
   `korean` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Korean',
   `portuguese` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Portuguese',
+  `russian` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Russian',
   `spanish` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Spanish',
   `thai` varchar(16) COLLATE utf8mb4_unicode_ci NULL COMMENT 'The Pokemons name in Thai',
   PRIMARY KEY (`dex`),
   UNIQUE KEY `dex` (`dex`),
   KEY `dex_index` (`dex`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of the names for the different Pokemon';
 
 CREATE TABLE `user_preferences` (
   `user_id` bigint(20) unsigned NOT NULL COMMENT 'The users Discord ID',
