@@ -6,6 +6,7 @@ from prettytable import PrettyTable
 import discord
 import lib.embedder
 import logging
+import os
 
 
 class Maintenance(commands.Cog):
@@ -29,13 +30,61 @@ class Maintenance(commands.Cog):
         self.logger.info("Loading maintenance cog")
 
         self.temp_redis = Redis("temp_message")
+        self.clean_mysql_logs.start()
         self.missing_pokemon_form_names.start()
         self.temporary_messages.start()
 
     def cog_unload(self):
         self.logger.info("Unloading maintenance cog")
+        self.clean_mysql_logs.stop()
         self.missing_pokemon_form_names.stop()
         self.temporary_messages.stop()
+
+    @tasks.loop(count=1)
+    async def clean_mysql_logs(self):
+        """Cleans up old log entries
+
+        This cleans up any old logs. Keeping only the last month, or two months
+        for critical ones.
+
+        Loop count is set to 1 so that it only runs on start up. Any more and that
+        would just be excessive.
+        """
+
+        # If the user isn't using the MySQL logger, then don't bother trying to
+        # clean it.
+        if os.environ['LOGGER_STREAM'].lower() != "mysql":
+            return
+
+        # Counter for all of the logs that were cleaned up
+        count = 0
+
+        # Initiate the database
+        db = mysql()
+
+        # Clean non-critical logs
+        query = """
+            DELETE FROM logs
+            WHERE recorded < DATE_SUB(NOW(), INTERVAL 1 MONTH)
+                AND level != 'CRITICAL';
+        """
+        db.execute(query)
+        count += db.cursor.rowcount
+
+        # Clean critical logs
+        query = """
+            DELETE FROM logs
+            WHERE recorded < DATE_SUB(NOW(), INTERVAL 2 MONTH)
+                AND level = 'CRITICAL';
+        """
+        db.execute(query)
+        count += db.cursor.rowcount
+
+        # Close the database
+        db.close()
+
+        # Log how many logs were removed
+        self.logger.info(f"Cleaned up {count} old logs.")
 
     @tasks.loop(hours=6)
     async def missing_pokemon_form_names(self):
