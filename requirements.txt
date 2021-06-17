@@ -3,4 +3,5 @@ mysql-connector-python ~= 8.0.21
 prettytable ~= 2.0.0
 PyGitHub ~= 1.54.1
 python-dotenv == 0.14.0
+python-json-logger ~= 2.0.1
 redis ~= 3.5.3

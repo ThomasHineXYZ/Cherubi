@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 from dotenv import load_dotenv
+from lib.mysql import mysql
 from pathlib import Path
+from pythonjsonlogger import jsonlogger
 import os
 import logging
 import sys
@@ -43,18 +45,31 @@ class Logger():
 
         if self._logger_stream == "file":
             handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
+            handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
+
         elif (
             (self._logger_stream == "stdout")
             or (self._logger_stream == "terminal")
         ):
             handler = logging.StreamHandler(stream=sys.stdout)
+
+        elif self._logger_stream == "json":
+            handler = logging.FileHandler(filename=f"log/{self._name}.json", encoding='utf-8', mode='w')
+            formatter = jsonlogger.JsonFormatter()
+            handler.setFormatter(formatter)
+
         elif self._logger_stream == "mysql":
-            handler = logging.StreamHandler()
+            # The split character is changed to §, since I doubt this will come
+            # up in any logger stuff
+            handler = logging.StreamHandler(MySQLStreamHandler())
+            handler.setFormatter(logging.Formatter(
+                "%(asctime)s§%(levelname)s§%(name)s§%(message)s",
+                "%Y-%m-%d %H:%M:%S"
+            ))
+
         else:
             handler = logging.StreamHandler(stream=sys.stdout)
-
-        # Set the format
-        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+            handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 
         return handler
 
@@ -97,3 +112,25 @@ class Logger():
 
     def critical(self, *args):
         return self._logger.critical(*args)
+
+
+class MySQLStreamHandler(logging.StreamHandler):
+    """docstring for ClassName"""
+
+    def __init__(self):
+        logging.StreamHandler.__init__(self)
+        self.query = """
+            INSERT INTO logs (recorded, level, name, message)
+            VALUES (%s, %s, %s, %s);
+        """
+
+    def write(self, record):
+        split_record = record.split("§")
+        db = mysql()
+        db.execute(self.query, [
+            split_record[0],  # asctime
+            split_record[1],  # levelname
+            split_record[2],  # name
+            split_record[3],  # message
+        ])
+        db.close()
