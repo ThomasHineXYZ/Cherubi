@@ -45,13 +45,20 @@ class Logger():
 
         if self._logger_stream == "file":
             handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
-            handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
+            handler.setFormatter(logging.Formatter(
+                "%(asctime)s:%(levelname)s:%(name)s: %(message)s",
+                "%Y-%m-%d %H:%M:%S"
+            ))
 
         elif (
             (self._logger_stream == "stdout")
             or (self._logger_stream == "terminal")
         ):
             handler = logging.StreamHandler(stream=sys.stdout)
+            handler.setFormatter(logging.Formatter(
+                "%(levelname)s:%(name)s: %(message)s",
+                "%Y-%m-%d %H:%M:%S"
+            ))
 
         elif self._logger_stream == "json":
             handler = logging.FileHandler(filename=f"log/{self._name}.json", encoding='utf-8', mode='w')
@@ -69,7 +76,10 @@ class Logger():
 
         else:
             handler = logging.StreamHandler(stream=sys.stdout)
-            handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+            handler.setFormatter(logging.Formatter(
+                "%(levelname)s:%(name)s: %(message)s",
+                "%Y-%m-%d %H:%M:%S"
+            ))
 
         return handler
 
