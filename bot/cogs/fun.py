@@ -101,6 +101,7 @@ class Fun(commands.Cog):
 
     def cog_unload(self):
         self.logger.info("Unloading fun cog")
+        self.add_more_greeting_stuff.stop()
 
     @tasks.loop(count=1)
     async def add_more_greeting_stuff(self):
