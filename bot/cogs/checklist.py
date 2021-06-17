@@ -3,11 +3,20 @@ from lib.mysql import mysql
 from typing import Optional
 import discord
 import lib.embedder
-import os
+import logging
+
 
 class Checklist(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading checklist cog")
+
+    def cog_unload(self):
+        self.logger.info("Unloading checklist cog")
 
     @commands.group(
         name = "shiny",

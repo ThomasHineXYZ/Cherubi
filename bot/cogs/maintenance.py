@@ -5,6 +5,7 @@ from lib.rediswrapper import Redis
 from prettytable import PrettyTable
 import discord
 import lib.embedder
+import logging
 
 
 class Maintenance(commands.Cog):
@@ -22,14 +23,17 @@ class Maintenance(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-        print("Loading maintenance cog")
+        # Set up the loggers
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading maintenance cog")
 
         self.temp_redis = Redis("temp_message")
         self.missing_pokemon_form_names.start()
         self.temporary_messages.start()
 
     def cog_unload(self):
-        print("Unloading maintenance cog")
+        self.logger.info("Unloading maintenance cog")
         self.missing_pokemon_form_names.stop()
         self.temporary_messages.stop()
 
@@ -151,7 +155,7 @@ class Maintenance(commands.Cog):
     @temporary_messages.after_loop
     async def after_temporary_messages(self):
         keys = self.temp_redis.keys()
-        print(f"{len(keys)} temporary messages waiting for cleanup")
+        self.logger.info(f"{len(keys)} temporary messages waiting for cleanup")
 
 
 def setup(client):

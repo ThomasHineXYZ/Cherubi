@@ -27,6 +27,38 @@ class Logger():
         self._name = name
         self._logger = logging.getLogger(self._name)
 
+        # Set the handler and the level
+        self._set_level(logger_level)
+        handler = self._set_handler()
+
+        if os.environ['DEBUG'].lower() == "true":
+            print(f"Logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
+
+        # Finally, add in the configured handler
+        self._logger.addHandler(handler)
+
+    def _set_handler(self):
+        # Set where the logger gets stored
+        self._logger_stream = os.environ['LOGGER_STREAM'].lower()
+
+        if self._logger_stream == "file":
+            handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
+        elif (
+            (self._logger_stream == "stdout")
+            or (self._logger_stream == "terminal")
+        ):
+            handler = logging.StreamHandler(stream=sys.stdout)
+        elif self._logger_stream == "mysql":
+            handler = logging.StreamHandler()
+        else:
+            handler = logging.StreamHandler(stream=sys.stdout)
+
+        # Set the format
+        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+
+        return handler
+
+    def _set_level(self, logger_level):
         # Allow for an override, mostly for debugging during development.
         # This way a single cog can be isolated if needed.
         if logger_level:
@@ -46,29 +78,7 @@ class Logger():
         elif self._logger_level == "critical":
             self._logger.setLevel(logging.CRITICAL)
         else:
-            print("Logging level: default (ERROR)")
             self._logger.setLevel(logging.ERROR)
-
-        # Set where the logger gets stored
-        self._logger_stream = os.environ['LOGGER_STREAM'].lower()
-
-        if self._logger_stream == "file":
-            handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
-        elif (
-            (self._logger_stream == "stdout")
-            or (self._logger_stream == "terminal")
-        ):
-            handler = logging.StreamHandler(stream=sys.stdout)
-        else:
-            handler = logging.StreamHandler(stream=sys.stdout)
-
-        print(f"Logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
-
-        # Set the format
-        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-
-        # Finally, add in the configured handler
-        self._logger.addHandler(handler)
 
     def __enter__(self):
         return self

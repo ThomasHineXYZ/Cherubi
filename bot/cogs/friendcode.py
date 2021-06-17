@@ -5,19 +5,24 @@ from lib.rediswrapper import Redis
 from typing import Optional
 import discord
 import lib.embedder
+import logging
 import uuid
 
 
 class FriendCode(commands.Cog):
     def __init__(self, client):
         self.client = client
-        print("Loading friendcode cog")
+
+        # Set up the loggers
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading friendcode cog")
 
         # Set up Redis
         self.temp_redis = Redis("temp_message:friendcode")
 
     def cog_unload(self):
-        print("Unloading friendcode cog")
+        self.logger.info("Unloading friendcode cog")
 
     def is_guild_owner():
         def predicate(ctx):

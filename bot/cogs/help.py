@@ -1,11 +1,20 @@
 from discord.ext import commands
 import discord
 import lib.embedder
+import logging
 
 
 class Help(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading help cog")
+
+    def cog_unload(self):
+        self.logger.info("Unloading help cog")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

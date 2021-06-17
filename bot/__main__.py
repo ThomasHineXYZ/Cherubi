@@ -19,7 +19,10 @@ if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
 # Set up logger
-logger = Logger("discord")
+logger = Logger("main")
+Logger("discord")
+Logger("cogs")
+
 
 # Sets the guild preferences for the guilds
 def set_default_preferences(db, guild_id):
@@ -97,7 +100,7 @@ async def on_ready():
         await status.set_status("online")
         await status.set_activity(f"listening your input. Helping ~{len(client.guilds)} servers and ~{len(client.users)} users.")
 
-    print("Bot is ready.")
+    logger.info("Bot is ready.")
 
 
 @client.event
@@ -132,7 +135,7 @@ async def on_command_error(ctx, exc):
 
 @client.event
 async def on_guild_join(guild):
-    print(f"Joined guild: {guild.id} / {guild.name}")
+    logger.info(f"Joined guild: {guild.id} / {guild.name}")
     # Set the default preferences for a guild upon joining
     db = mysql()
     set_default_preferences(db, guild.id)
@@ -141,7 +144,7 @@ async def on_guild_join(guild):
 
 @client.event
 async def on_guild_remove(guild):
-    print(f"Left guild: {guild.id} / {guild.name}")
+    logger.info(f"Left guild: {guild.id} / {guild.name}")
 
     # Removes the preferences line for a guild
     db = mysql()
@@ -164,12 +167,12 @@ async def on_connect():
 
     db.close()
 
-    print("Bot Connected")
+    logger.info("Bot Connected")
 
 
 @client.event
 async def on_disconnect():
-    print("Bot Disconnected")
+    logger.info("Bot Disconnected")
 
 
 @client.command(
@@ -210,7 +213,7 @@ async def changeprefix(ctx, prefix):
 @client.command()
 @commands.is_owner()
 async def load(ctx, extension):
-    print(f"Loading {extension}")
+    logger.info(f"Loading {extension}")
     await ctx.send(f"Loading {extension}")
     client.load_extension(f"cogs.{extension}")
 
@@ -218,7 +221,7 @@ async def load(ctx, extension):
 @client.command()
 @commands.is_owner()
 async def unload(ctx, extension):
-    print(f"Unloading {extension}")
+    logger.info(f"Unloading {extension}")
     await ctx.send(f"Unloading {extension}")
     client.unload_extension(f"cogs.{extension}")
 
@@ -226,7 +229,7 @@ async def unload(ctx, extension):
 @client.command()
 @commands.is_owner()
 async def reload(ctx, extension):
-    print(f"Reloading {extension}")
+    logger.info(f"Reloading {extension}")
     await ctx.send(f"Reloading {extension}")
     client.unload_extension(f"cogs.{extension}")
     client.load_extension(f"cogs.{extension}")
@@ -238,7 +241,7 @@ if os.environ['DEBUG'].lower() == "true":
     @commands.is_owner()
     async def stop(ctx):
         await ctx.send("Stopping...")
-        print("`stop` command was run. Stopping...")
+        logger.critical("`stop` command was run. Stopping...")
         await client.close()
 
 # Load up the cogs

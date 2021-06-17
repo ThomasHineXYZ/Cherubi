@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from discord.ext import commands, tasks
 import discord
+import logging
 import random
 import re
 
@@ -9,7 +10,11 @@ class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-        print("Loading fun cog")
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading fun cog")
+
         self.greetings = [
             "'Ello, gov'nor",
             "A pleasure meet you",
@@ -95,7 +100,7 @@ class Fun(commands.Cog):
         self.add_more_greeting_stuff.start()
 
     def cog_unload(self):
-        print("Unloading fun cog")
+        self.logger.info("Unloading fun cog")
 
     @tasks.loop(count=1)
     async def add_more_greeting_stuff(self):

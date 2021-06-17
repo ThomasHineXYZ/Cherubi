@@ -1,11 +1,20 @@
 from discord.ext import commands
 from lib.mysql import mysql
 import lib.embedder
+import logging
 
 
 class FancyEmbed(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading fancyembed cog")
+
+    def cog_unload(self):
+        self.logger.info("Unloading fancyembed cog")
 
     @commands.command(
         brief="Shows you a picture of the shiny Pokémon you give",
