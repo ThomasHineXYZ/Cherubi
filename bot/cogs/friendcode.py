@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from discord.ext import commands
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from lib.rediswrapper import Redis
 from typing import Optional
 import discord

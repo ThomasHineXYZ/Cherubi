@@ -1,6 +1,6 @@
 from discord.ext import commands
 from dotenv import load_dotenv
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from lib.logger import Logger
 from pathlib import Path
 import discord
@@ -24,6 +24,7 @@ logger = logging.getLogger("main")
 Logger("main")
 Logger("discord")
 Logger("cogs")
+Logger("lib", None, "file")
 
 
 # Sets the guild preferences for the guilds

@@ -1,5 +1,5 @@
 from discord.ext import commands
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 import lib.embedder
 import logging
 

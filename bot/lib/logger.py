@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from dotenv import load_dotenv
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from pathlib import Path
 from pythonjsonlogger import jsonlogger
 import os
@@ -22,7 +22,7 @@ class Logger():
     if os.path.isfile(local_env_file_name):
         load_dotenv(dotenv_path=local_env_path, override=True)
 
-    def __init__(self, name, logger_level=None):
+    def __init__(self, name, logger_level=None, logger_stream=None):
         """
         Set up the logger instance
         """
@@ -31,7 +31,7 @@ class Logger():
 
         # Set the handler and the level
         self._set_level(logger_level)
-        handler = self._set_handler()
+        handler = self._set_handler(logger_stream)
 
         if os.environ['DEBUG'].lower() == "true":
             print(f"Logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
@@ -39,24 +39,21 @@ class Logger():
         # Finally, add in the configured handler
         self._logger.addHandler(handler)
 
-    def _set_handler(self):
-        # Set where the logger gets stored
-        self._logger_stream = os.environ['LOGGER_STREAM'].lower()
+    def __enter__(self):
+        return self
+
+    def _set_handler(self, logger_stream):
+        # Allow for an override, mostly for debugging during development.
+        # This way a single cog can be isolated if needed.
+        if logger_stream:
+            self._logger_stream = logger_stream
+        else:
+            self._logger_stream = os.environ['LOGGER_STREAM'].lower()
 
         if self._logger_stream == "file":
             handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
             handler.setFormatter(logging.Formatter(
                 "%(asctime)s:%(levelname)s:%(name)s: %(message)s",
-                "%Y-%m-%d %H:%M:%S"
-            ))
-
-        elif (
-            (self._logger_stream == "stdout")
-            or (self._logger_stream == "terminal")
-        ):
-            handler = logging.StreamHandler(stream=sys.stdout)
-            handler.setFormatter(logging.Formatter(
-                "%(levelname)s:%(name)s: %(message)s",
                 "%Y-%m-%d %H:%M:%S"
             ))
 
@@ -72,6 +69,19 @@ class Logger():
             handler.setFormatter(logging.Formatter(
                 "%(asctime)s§%(levelname)s§%(name)s§%(message)s",
                 "%Y-%m-%d %H:%M:%S"
+            ))
+
+        elif self._logger_stream == "simple":
+            handler = logging.StreamHandler(stream=sys.stdout)
+            handler.setFormatter(logging.Formatter("%(message)s"))
+
+        elif (
+            (self._logger_stream == "stdout")
+            or (self._logger_stream == "terminal")
+        ):
+            handler = logging.StreamHandler(stream=sys.stdout)
+            handler.setFormatter(logging.Formatter(
+                "%(levelname)s:%(name)s: %(message)s"
             ))
 
         else:
@@ -104,24 +114,6 @@ class Logger():
             self._logger.setLevel(logging.CRITICAL)
         else:
             self._logger.setLevel(logging.ERROR)
-
-    def __enter__(self):
-        return self
-
-    def debug(self, *args):
-        return self._logger.debug(*args)
-
-    def info(self, *args):
-        return self._logger.info(*args)
-
-    def warning(self, *args):
-        return self._logger.warning(*args)
-
-    def error(self, *args):
-        return self._logger.error(*args)
-
-    def critical(self, *args):
-        return self._logger.critical(*args)
 
 
 class MySQLStreamHandler(logging.StreamHandler):

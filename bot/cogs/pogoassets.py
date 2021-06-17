@@ -1,5 +1,5 @@
 from discord.ext import commands, tasks
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 import github
 import os
 import requests

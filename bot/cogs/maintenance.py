@@ -1,6 +1,6 @@
 from datetime import datetime
 from discord.ext import commands, tasks
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from lib.rediswrapper import Redis
 from prettytable import PrettyTable
 import discord
