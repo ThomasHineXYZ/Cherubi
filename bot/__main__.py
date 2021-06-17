@@ -1,6 +1,7 @@
 from discord.ext import commands
 from dotenv import load_dotenv
 from lib.mysql import mysql
+from lib.logger import Logger
 from pathlib import Path
 import discord
 import os
@@ -17,6 +18,8 @@ local_env_path = Path('.') / local_env_file_name
 if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
+# Set up logger
+logger = Logger("discord")
 
 # Sets the guild preferences for the guilds
 def set_default_preferences(db, guild_id):

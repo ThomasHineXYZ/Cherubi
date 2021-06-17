@@ -10,9 +10,9 @@ It is a Python bot based off of the [`discord.py 1.3.4` project](https://discord
 [Here's the invite link for the bot](https://discordapp.com/oauth2/authorize?client_id=741194655680561172&scope=bot&permissions=268823632)
 ## Requirements
 1. An [application and bot setup for Discord](https://discord.com/developers/) (You'll need the token for it).
-1. A MariaDB (or MySQL) database.
-1. Python 3.7+ installed
-1. PIP for Python 3
+1. MariaDB (or MySQL) database.
+1. Redis
+1. Python 3.7+ and PIP
 
 ## Instructions
 1. Clone this repo into the place you want to run it from.
