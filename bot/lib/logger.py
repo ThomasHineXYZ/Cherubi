@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 import logging
+import sys
 
 
 class Logger():
@@ -35,26 +36,38 @@ class Logger():
 
         # Set the logging level
         if self._logger_level == "debug":
-            print("Logging level: DEBUG")
             self._logger.setLevel(logging.DEBUG)
         elif self._logger_level == "info":
-            print("Logging level: INFO")
             self._logger.setLevel(logging.INFO)
         elif self._logger_level == "warning":
-            print("Logging level: WARNING")
             self._logger.setLevel(logging.WARNING)
         elif self._logger_level == "error":
-            print("Logging level: ERROR")
             self._logger.setLevel(logging.ERROR)
         elif self._logger_level == "critical":
-            print("Logging level: CRITICAL")
             self._logger.setLevel(logging.CRITICAL)
         else:
             print("Logging level: default (ERROR)")
             self._logger.setLevel(logging.ERROR)
 
-        handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
+        # Set where the logger gets stored
+        self._logger_stream = os.environ['LOGGER_STREAM'].lower()
+
+        if self._logger_stream == "file":
+            handler = logging.FileHandler(filename=f"log/{self._name}.log", encoding='utf-8', mode='w')
+        elif (
+            (self._logger_stream == "stdout")
+            or (self._logger_stream == "terminal")
+        ):
+            handler = logging.StreamHandler(stream=sys.stdout)
+        else:
+            handler = logging.StreamHandler(stream=sys.stdout)
+
+        print(f"Logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
+
+        # Set the format
         handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+
+        # Finally, add in the configured handler
         self._logger.addHandler(handler)
 
     def __enter__(self):
