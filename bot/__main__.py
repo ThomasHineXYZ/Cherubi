@@ -4,6 +4,7 @@ from lib.mysql import mysql
 from lib.logger import Logger
 from pathlib import Path
 import discord
+import logging
 import os
 
 # Load up the environment variables
@@ -19,7 +20,8 @@ if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
 # Set up logger
-logger = Logger("main")
+logger = logging.getLogger("main")
+Logger("main")
 Logger("discord")
 Logger("cogs")
 
@@ -247,6 +249,10 @@ if os.environ['DEBUG'].lower() == "true":
 # Load up the cogs
 for filename in os.listdir("./bot/cogs"):
     if filename.endswith(".py"):
-        client.load_extension(f"cogs.{filename[:-3]}")
+        try:
+            client.load_extension(f"cogs.{filename[:-3]}")
+        except Exception:
+            logger.critical(f"Unable to load {filename} cog.", exc_info=1)
+            raise SystemExit
 
 client.run(os.environ['DISCORD_BOT_TOKEN'])
