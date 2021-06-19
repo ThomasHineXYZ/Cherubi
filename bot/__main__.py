@@ -20,10 +20,12 @@ if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
 # Set up loggers
+# lib has to be first, since the logger lib gets called first.
+Logger("lib")
 Logger("cogs")
 Logger("discord")
-Logger("lib", "debug")
-Logger("mysql", None, "file")  # MySQL is first, since it's one of the first things called
+Logger("mysql", None, "file")
+Logger("Redis", None, "file")
 Logger("main")
 logger = logging.getLogger("main")
 

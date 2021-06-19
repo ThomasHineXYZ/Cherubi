@@ -20,8 +20,10 @@ class mysql():
     if os.path.isfile(local_env_file_name):
         load_dotenv(dotenv_path=local_env_path, override=True)
 
+    # Set up logger. If it fails, then exit.
+    # We're using the qualname here so that it's separate from other libs,
+    # since using it to store stuff for logger can cause a recursion issue.
     try:
-        # Set up logger
         logger = logging.getLogger(__qualname__)
         logger.addHandler(logging.NullHandler())
     except Exception as e:
@@ -30,6 +32,14 @@ class mysql():
 
     def __init__(self):
         try:
+            self.logger.debug(f"""
+Setting up and connecting.
+MYSQL_HOST: {os.environ['MYSQL_HOST']}
+MYSQL_USER: {os.environ['MYSQL_USER']}
+MYSQL_PASS: {os.environ['MYSQL_PASS']}
+MYSQL_DBNAME: {os.environ['MYSQL_DBNAME']}
+MYSQL_PORT: {os.environ['MYSQL_PORT']}
+            """)
             self._db = connector.connect(
                 host=os.environ['MYSQL_HOST'],
                 user=os.environ['MYSQL_USER'],
@@ -40,7 +50,7 @@ class mysql():
             self._cursor = self._db.cursor(dictionary=True)
             self.logger.debug("MySQL connected successfully.")
         except Exception:
-            self.logger.critical("The MySQL lib can't connect to the given database.", exc_info=1)
+            self.logger.critical("MySQL can't connect to the given database.", exc_info=1)
             raise SystemExit
 
     def __enter__(self):

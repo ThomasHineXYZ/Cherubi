@@ -96,7 +96,7 @@ class Logger():
                 "%Y-%m-%d %H:%M:%S"
             ))
 
-        self.log.debug(f"Saving `{self._name}` in/with \"{self._logger_stream.upper()}\"")
+        self.log.debug("Saving `%s` in/with \"%s\"", self._name, self._logger_stream.upper())
 
         return handler
 
@@ -122,7 +122,7 @@ class Logger():
         else:
             self._logger.setLevel(logging.ERROR)
 
-        self.log.debug(f"Setting `{self._name}` as \"{self._logger_level.upper()}\"")
+        self.log.debug("Setting `%s` as \"%s\"", self._name, self._logger_level.upper())
 
 
 class MySQLStreamHandler(logging.StreamHandler):
