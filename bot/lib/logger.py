@@ -22,19 +22,24 @@ class Logger():
     if os.path.isfile(local_env_file_name):
         load_dotenv(dotenv_path=local_env_path, override=True)
 
+    # Set up logger
+    log = logging.getLogger(__name__)
+    log.addHandler(logging.NullHandler())
+
     def __init__(self, name, logger_level=None, logger_stream=None):
         """
         Set up the logger instance
         """
         self._name = name
         self._logger = logging.getLogger(self._name)
+        self.log.debug(f"Setting up logger for `{name}`.")
 
         # Set the handler and the level
         self._set_level(logger_level)
         handler = self._set_handler(logger_stream)
 
         if os.environ['DEBUG'].lower() == "true":
-            print(f"Logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
+            print(f"`{name}` logger set to {self._logger_level.upper()} and {self._logger_stream.upper()}")
 
         # Finally, add in the configured handler
         self._logger.addHandler(handler)
@@ -91,6 +96,8 @@ class Logger():
                 "%Y-%m-%d %H:%M:%S"
             ))
 
+        self.log.debug(f"Saving `{self._name}` in/with \"{self._logger_stream.upper()}\"")
+
         return handler
 
     def _set_level(self, logger_level):
@@ -114,6 +121,8 @@ class Logger():
             self._logger.setLevel(logging.CRITICAL)
         else:
             self._logger.setLevel(logging.ERROR)
+
+        self.log.debug(f"Setting `{self._name}` as \"{self._logger_level.upper()}\"")
 
 
 class MySQLStreamHandler(logging.StreamHandler):
