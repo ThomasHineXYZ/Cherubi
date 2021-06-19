@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from dotenv import load_dotenv
-from lib.mysqlwrapper import mysql
+from mysql import connector
 from pathlib import Path
 from pythonjsonlogger import jsonlogger
 import os
@@ -23,13 +23,14 @@ class Logger():
         load_dotenv(dotenv_path=local_env_path, override=True)
 
     # Set up logger
-    log = logging.getLogger(__name__)
+    log = logging.getLogger(__qualname__)
     log.addHandler(logging.NullHandler())
 
     def __init__(self, name, logger_level=None, logger_stream=None):
         """
         Set up the logger instance
         """
+
         self._name = name
         self._logger = logging.getLogger(self._name)
         self.log.debug(f"Setting up logger for `{name}`.")
@@ -130,6 +131,7 @@ class MySQLStreamHandler(logging.StreamHandler):
 
     def __init__(self):
         logging.StreamHandler.__init__(self)
+
         self.query = """
             INSERT INTO logs (recorded, level, name, message)
             VALUES (%s, %s, %s, %s);
@@ -137,11 +139,27 @@ class MySQLStreamHandler(logging.StreamHandler):
 
     def write(self, record):
         split_record = record.split("§")
-        db = mysql()
-        db.execute(self.query, [
+        db = self.setup_mysql()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(self.query, [
             split_record[0],  # asctime
             split_record[1],  # levelname
             split_record[2],  # name
             split_record[3],  # message
         ])
-        db.close()
+        db.commit()
+
+    def setup_mysql(self):
+        try:
+            db = connector.connect(
+                host=os.environ['MYSQL_HOST'],
+                user=os.environ['MYSQL_USER'],
+                password=os.environ['MYSQL_PASS'],
+                database=os.environ['MYSQL_DBNAME'],
+                port=os.environ['MYSQL_PORT']
+            )
+        except Exception as e:
+            print(e)
+            raise SystemExit
+
+        return db

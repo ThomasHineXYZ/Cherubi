@@ -201,10 +201,12 @@ class Maintenance(commands.Cog):
             except Exception:
                 pass
 
+        self.logger.info(f"{len(keys)} temporary messages were cleaned up.")
+
     @temporary_messages.after_loop
     async def after_temporary_messages(self):
         keys = self.temp_redis.keys()
-        self.logger.info(f"{len(keys)} temporary messages waiting for cleanup")
+        self.logger.info(f"{len(keys)} temporary messages waiting for cleanup.")
 
 
 def setup(client):
