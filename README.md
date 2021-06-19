@@ -1,5 +1,4 @@
 [![shield.io](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-364/)
-[![shield.io](https://img.shields.io/badge/support-discord-lightgrey.svg)](https://discord.gg/hhVjAN8)
 
 # Cherubi
 
