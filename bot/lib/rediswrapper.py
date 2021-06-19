@@ -28,6 +28,11 @@ class Redis():
         )
         self._prefix = prefix + ":" if prefix else ""
 
+        # Add the global prefix and given class prefix if any of them are given.
+        self._prefix = ""
+        self._prefix += os.environ['REDIS_PREFIX'] + ":" if os.environ['REDIS_PREFIX'] else ""
+        self._prefix += prefix + ":" if prefix else ""
+
     def __enter__(self):
         return self
 
