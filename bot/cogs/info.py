@@ -13,6 +13,7 @@ class Info(commands.Cog):
         self.logger = logging.getLogger(__name__)
 
         self.logger.info("Loading info cog")
+        self.logger.addHandler(logging.NullHandler())
 
     def cog_unload(self):
         self.logger.info("Unloading info cog")

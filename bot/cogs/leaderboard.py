@@ -12,6 +12,7 @@ class Leaderboard(commands.Cog):
         self.logger = logging.getLogger(__name__)
 
         self.logger.info("Loading leaderboard cog")
+        self.logger.addHandler(logging.NullHandler())
 
     def cog_unload(self):
         self.logger.info("Unloading leaderboard cog")

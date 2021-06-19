@@ -15,6 +15,7 @@ class FriendCode(commands.Cog):
 
         # Set up the loggers
         self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
 
         self.logger.info("Loading friendcode cog")
 

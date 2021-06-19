@@ -10,6 +10,7 @@ class FancyEmbed(commands.Cog):
 
         # Set up the logger
         self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
 
         self.logger.info("Loading fancyembed cog")
 

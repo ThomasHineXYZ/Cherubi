@@ -12,6 +12,7 @@ class Help(commands.Cog):
         self.logger = logging.getLogger(__name__)
 
         self.logger.info("Loading help cog")
+        self.logger.addHandler(logging.NullHandler())
 
     def cog_unload(self):
         self.logger.info("Unloading help cog")
