@@ -19,12 +19,13 @@ local_env_path = Path('.') / local_env_file_name
 if os.path.isfile(local_env_file_name):
     load_dotenv(dotenv_path=local_env_path, override=True)
 
-# Set up logger
-logger = logging.getLogger("main")
-Logger("main")
-Logger("discord")
+# Set up loggers
 Logger("cogs")
-Logger("lib", None, "file")
+Logger("discord")
+Logger("lib", "debug")
+Logger("mysql", None, "file")  # MySQL is first, since it's one of the first things called
+Logger("main")
+logger = logging.getLogger("main")
 
 
 # Sets the guild preferences for the guilds

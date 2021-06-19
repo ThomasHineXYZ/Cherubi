@@ -20,9 +20,13 @@ class mysql():
     if os.path.isfile(local_env_file_name):
         load_dotenv(dotenv_path=local_env_path, override=True)
 
-    # Set up logger
-    log = logging.getLogger(__name__)
-    log.addHandler(logging.NullHandler())
+    try:
+        # Set up logger
+        logger = logging.getLogger(__qualname__)
+        logger.addHandler(logging.NullHandler())
+    except Exception as e:
+        print(e)
+        raise SystemExit
 
     def __init__(self):
         try:
@@ -34,9 +38,9 @@ class mysql():
                 port=os.environ['MYSQL_PORT']
             )
             self._cursor = self._db.cursor(dictionary=True)
-            self.log.debug("MySQL connected successfully.")
+            self.logger.debug("MySQL connected successfully.")
         except Exception:
-            self.log.critical("The MySQL lib can't connect to the given database.", exc_info=1)
+            self.logger.critical("The MySQL lib can't connect to the given database.", exc_info=1)
             raise SystemExit
 
     def __enter__(self):
@@ -62,22 +66,22 @@ class mysql():
         self.connection.close()
 
     def execute(self, sql, params=None):
-        self.log.debug("execute:\n[Query: %s]\n[Params: %s]", sql, params)
+        self.logger.debug("execute:\n[Query: %s]\n[Params: %s]", sql, params)
         self.cursor.execute(sql, params or ())
 
     def executemany(self, sql, params=None):
-        self.log.debug("executemany:\n[Query: %s]\n[Params: %s]", sql, params)
+        self.logger.debug("executemany:\n[Query: %s]\n[Params: %s]", sql, params)
         self.cursor.executemany(sql, params or ())
 
     def fetchall(self):
-        self.log.debug("fetchall")
+        self.logger.debug("fetchall")
         return self.cursor.fetchall()
 
     def fetchone(self):
-        self.log.debug("fetchone")
+        self.logger.debug("fetchone")
         return self.cursor.fetchone()
 
     def query(self, sql, params=None):
-        self.log.debug("query:\n[Query: %s]\n[Params: %s]", sql, params)
+        self.logger.debug("query:\n[Query: %s]\n[Params: %s]", sql, params)
         self.cursor.execute(sql, params or ())
         return self.fetchall()
