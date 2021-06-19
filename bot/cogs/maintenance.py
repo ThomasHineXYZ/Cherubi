@@ -31,9 +31,13 @@ class Maintenance(commands.Cog):
         self.logger.info("Loading maintenance cog")
 
         self.temp_redis = Redis("temp_message")
-        self.clean_mysql_logs.start()
         self.missing_pokemon_form_names.start()
         self.temporary_messages.start()
+
+        # If the user isn't using the MySQL logger, then don't bother trying to
+        # clean it.
+        if ((os.environ['LOGGER_STREAM'].lower() == "mysql")):
+            self.clean_mysql_logs.start()
 
     def cog_unload(self):
         self.logger.info("Unloading maintenance cog")
@@ -51,11 +55,6 @@ class Maintenance(commands.Cog):
         Loop count is set to 1 so that it only runs on start up. Any more and that
         would just be excessive.
         """
-
-        # If the user isn't using the MySQL logger, then don't bother trying to
-        # clean it.
-        if os.environ['LOGGER_STREAM'].lower() != "mysql":
-            return
 
         # Counter for all of the logs that were cleaned up
         count = 0
