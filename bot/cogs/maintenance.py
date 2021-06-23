@@ -36,7 +36,7 @@ class Maintenance(commands.Cog):
 
         # If the user isn't using the MySQL logger, then don't bother trying to
         # clean it.
-        if ((os.environ['LOGGER_STREAM'].lower() == "mysql")):
+        if os.environ['LOGGER_STREAM'].lower() == "mysql":
             self.clean_mysql_logs.start()
 
     def cog_unload(self):

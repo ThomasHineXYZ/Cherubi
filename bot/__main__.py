@@ -25,7 +25,7 @@ Logger("lib")
 Logger("cogs")
 Logger("discord")
 Logger("mysql", None, "file")
-Logger("Redis", None, "file")
+Logger("Redis")
 Logger("main")
 logger = logging.getLogger("main")
 
