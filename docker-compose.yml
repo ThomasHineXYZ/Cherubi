@@ -1,0 +1,5 @@
+services:
+    discordpy-bot:
+        build: .
+        volumes:
+            - /mnt/user/appdata/cherubi:/config:rw
