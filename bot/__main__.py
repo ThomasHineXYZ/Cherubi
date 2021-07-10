@@ -24,7 +24,7 @@ if os.path.isfile(local_env_file_name):
 Logger("lib")
 Logger("cogs")
 Logger("discord")
-Logger("mysql", None, "file")
+Logger("mysql", os.environ['LOGGER_MYSQL_LEVEL'], os.environ['LOGGER_MYSQL_STREAM'])
 Logger("Redis")
 Logger("main")
 logger = logging.getLogger("main")
