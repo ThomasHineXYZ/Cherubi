@@ -1,21 +1,26 @@
 from discord.ext import commands, tasks
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 import github
-import json
 import os
 import requests
+import logging
 
 
 class PoGoAssets(commands.Cog):
     def __init__(self, client):
         self.client = client
-        print("Loading pogoassets cog")
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
+
+        self.logger.info("Loading pogoassets cog")
 
         self.load_data_from_github.start()
         self.github = github.Github(os.environ['GITHUB_ACCESS_TOKEN'])
 
     def cog_unload(self):
-        print("Unloading pogoassets cog")
+        self.logger.info("Unloading pogoassets cog")
 
     def get_newest_commit_hash(self, repo):
         branch = repo.get_branch("master")
@@ -439,10 +444,9 @@ class PoGoAssets(commands.Cog):
             # Import the various language files in case there are any changes
             self.import_text_files()
 
-            print("New PokeMiners/pogo_assets commit!")
-
+            self.logger.info("New PokeMiners/pogo_assets commit!")
         else:
-            print("No new PokeMiners/pogo_assets commit.")
+            self.logger.info("No new PokeMiners/pogo_assets commit.")
 
     # Makes the load_data_from_github function now start up until the client is ready
     @load_data_from_github.before_loop

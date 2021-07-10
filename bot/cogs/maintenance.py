@@ -1,10 +1,12 @@
 from datetime import datetime
 from discord.ext import commands, tasks
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from lib.rediswrapper import Redis
 from prettytable import PrettyTable
 import discord
 import lib.embedder
+import logging
+import os
 
 
 class Maintenance(commands.Cog):
@@ -22,16 +24,67 @@ class Maintenance(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-        print("Loading maintenance cog")
+        # Set up the loggers
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
+
+        self.logger.info("Loading maintenance cog")
 
         self.temp_redis = Redis("temp_message")
         self.missing_pokemon_form_names.start()
         self.temporary_messages.start()
 
+        # If the user isn't using the MySQL logger, then don't bother trying to
+        # clean it.
+        if os.environ['LOGGER_STREAM'].lower() == "mysql":
+            self.clean_mysql_logs.start()
+
     def cog_unload(self):
-        print("Unloading maintenance cog")
+        self.logger.info("Unloading maintenance cog")
+        self.clean_mysql_logs.stop()
         self.missing_pokemon_form_names.stop()
         self.temporary_messages.stop()
+
+    @tasks.loop(count=1)
+    async def clean_mysql_logs(self):
+        """Cleans up old log entries
+
+        This cleans up any old logs. Keeping only the last month, or two months
+        for critical ones.
+
+        Loop count is set to 1 so that it only runs on start up. Any more and that
+        would just be excessive.
+        """
+
+        # Counter for all of the logs that were cleaned up
+        count = 0
+
+        # Initiate the database
+        db = mysql()
+
+        # Clean non-critical logs
+        query = """
+            DELETE FROM logs
+            WHERE recorded < DATE_SUB(NOW(), INTERVAL 1 MONTH)
+                AND level != 'CRITICAL';
+        """
+        db.execute(query)
+        count += db.cursor.rowcount
+
+        # Clean critical logs
+        query = """
+            DELETE FROM logs
+            WHERE recorded < DATE_SUB(NOW(), INTERVAL 2 MONTH)
+                AND level = 'CRITICAL';
+        """
+        db.execute(query)
+        count += db.cursor.rowcount
+
+        # Close the database
+        db.close()
+
+        # Log how many logs were removed
+        self.logger.info(f"Cleaned up {count} old logs.")
 
     @tasks.loop(hours=6)
     async def missing_pokemon_form_names(self):
@@ -148,10 +201,12 @@ class Maintenance(commands.Cog):
             except Exception:
                 pass
 
+        self.logger.info(f"{len(keys)} temporary messages were cleaned up.")
+
     @temporary_messages.after_loop
     async def after_temporary_messages(self):
         keys = self.temp_redis.keys()
-        print(f"{len(keys)} temporary messages waiting for cleanup")
+        self.logger.info(f"{len(keys)} temporary messages waiting for cleanup.")
 
 
 def setup(client):

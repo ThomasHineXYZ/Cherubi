@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
-import os
+import logging
+
 
 class Status(commands.Cog):
     def __init__(self, client):
@@ -8,6 +9,15 @@ class Status(commands.Cog):
 
         self._message = "playing Booting up..."
         self._status = "online"
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
+
+        self.logger.info("Loading status cog")
+
+    def cog_unload(self):
+        self.logger.info("Unloading status cog")
 
     @property
     def message(self):
@@ -26,8 +36,7 @@ class Status(commands.Cog):
 
     @status.setter
     def status(self, value):
-        if value not in ("online", "offline", "idle", "dnd", "do_not_disturb",
-            "invisible"):
+        if value not in ("online", "offline", "idle", "dnd", "do_not_disturb", "invisible"):
             raise ValueError("Invalid status type.")
 
         self._status = value
@@ -50,6 +59,7 @@ class Status(commands.Cog):
     async def set_status(self, text: str):
         self.status = text
         await self.set()
+
 
 def setup(client):
     client.add_cog(Status(client))

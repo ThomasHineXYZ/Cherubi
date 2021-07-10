@@ -1,12 +1,21 @@
 from discord.ext import commands
-from lib.mysql import mysql
-import discord
+from lib.mysqlwrapper import mysql
 import lib.embedder
-import os
+import logging
+
 
 class Leaderboard(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+
+        self.logger.info("Loading leaderboard cog")
+        self.logger.addHandler(logging.NullHandler())
+
+    def cog_unload(self):
+        self.logger.info("Unloading leaderboard cog")
 
     @commands.group(
         name = "leaderboard",

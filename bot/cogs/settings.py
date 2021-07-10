@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from discord.ext import commands
-from lib.mysql import mysql
+from lib.mysqlwrapper import mysql
 from lib.rediswrapper import Redis
 import lib.embedder
+import logging
 import uuid
 
 
@@ -10,8 +11,17 @@ class Settings(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+        # Set up the logger
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.NullHandler())
+
+        self.logger.info("Loading settings cog")
+
         # Set up Redis
         self.temp_redis = Redis("temp_message:settings")
+
+    def cog_unload(self):
+        self.logger.info("Unloading settings cog")
 
     @commands.command(
         name="sethome",

@@ -31,6 +31,13 @@ CREATE TABLE `guild_preferences` (
   KEY `index_guild` (`guild`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Specific Guild Preferences';
 
+CREATE TABLE `logs` (
+  `recorded` datetime NOT NULL COMMENT 'The datetime when the event occured',
+  `level` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The level of the event',
+  `name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The logger that logged the event',
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'The message that was logged'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='The location for logs to be stored';
+
 CREATE TABLE `pokemon` (
   `dex` int(4) unsigned NOT NULL COMMENT 'Dex ID of the Pokemon',
   `type` varchar(2) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Type to signify a family difference',

@@ -1,5 +1,5 @@
-import discord
 from datetime import datetime
+import discord
 
 colours = {
     "blue": discord.Colour.blue(),
